@@ -20,6 +20,7 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
     private var sharedPreferences: SharedPreferences? = null
     private var usuarioActualEmail: String? = null
 
+    @Suppress("UNUSED")
     fun setContext(context: Context) {
         this.context = context
         if (sharedPreferences == null) {
@@ -112,7 +113,9 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
                         jsonCompra.put("productos", productosJson)
                         jsonArray.put(jsonCompra)
                     }
-                    it.edit().putString("compras_$usuarioActualEmail", jsonArray.toString()).apply()
+                    it.edit {
+                        putString("compras_$usuarioActualEmail", jsonArray.toString())
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -121,6 +124,7 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
     }
 
     // Agregar una nueva compra con múltiples productos
+    @Suppress("UNUSED")
     fun agregarCompra(
         supermercado: String,
         fecha: String,

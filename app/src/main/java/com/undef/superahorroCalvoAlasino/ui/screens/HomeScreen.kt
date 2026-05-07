@@ -24,8 +24,6 @@ import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +153,7 @@ fun HomeScreen(navController: NavController, compraViewModel: CompraViewModel) {
                         InsightCard(
                             icon = Icons.Default.TrendingDown,
                             title = "Máx. Gasto",
-                            value = "${"%.2f".format(compraMasCaraTotal)}",
+                            value = "%.2f".format(compraMasCaraTotal),
                             modifier = Modifier.weight(1f),
                             backgroundColor = Color(0xFFFFEBEE)
                         )
