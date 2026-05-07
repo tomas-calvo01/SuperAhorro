@@ -3,6 +3,7 @@ package com.undef.superahorroCalvoAlasino.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.mutableStateListOf
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.Producto
