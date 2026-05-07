@@ -1,0 +1,101 @@
+package com.undef.superahorroCalvoAlasino.viewmodel
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+
+data class Usuario(
+    val nombre: String = "",
+    val email: String = "",
+    val password: String = ""
+)
+
+class UsuarioViewModel(private var context: Context? = null) : ViewModel() {
+    private val _usuario = mutableStateOf(Usuario())
+    val usuario = _usuario
+    private var sharedPreferences: SharedPreferences? = null
+
+    init {
+        if (context != null) {
+            initializePreferences()
+        }
+    }
+
+    fun setContext(context: Context) {
+        this.context = context
+        initializePreferences()
+    }
+
+    private fun initializePreferences() {
+        if (sharedPreferences == null) {
+            context?.let {
+                sharedPreferences = it.getSharedPreferences("super_ahorro_prefs", Context.MODE_PRIVATE)
+                cargarUsuarioGuardado()
+            }
+        }
+    }
+
+    fun cargarUsuarioGuardado() {
+        if (sharedPreferences == null) {
+            initializePreferences()
+        }
+        sharedPreferences?.let {
+            val nombre = it.getString("nombre", "") ?: ""
+            val email = it.getString("email", "") ?: ""
+            val password = it.getString("password", "") ?: ""
+            if (nombre.isNotEmpty() || email.isNotEmpty() || password.isNotEmpty()) {
+                _usuario.value = Usuario(nombre = nombre, email = email, password = password)
+            }
+        }
+    }
+
+    fun registrarUsuario(nombre: String, email: String, password: String) {
+        if (sharedPreferences == null) {
+            initializePreferences()
+        }
+        _usuario.value = Usuario(nombre = nombre, email = email, password = password)
+        guardarUsuarioEnPreferencias()
+    }
+
+    fun actualizarPerfil(nombre: String, email: String, nuevaPassword: String) {
+        _usuario.value = Usuario(nombre = nombre, email = email, password = nuevaPassword)
+        guardarUsuarioEnPreferencias()
+    }
+
+    private fun guardarUsuarioEnPreferencias() {
+        if (sharedPreferences == null) {
+            initializePreferences()
+        }
+        sharedPreferences?.edit()?.apply {
+            putString("nombre", _usuario.value.nombre)
+            putString("email", _usuario.value.email)
+            putString("password", _usuario.value.password)
+            apply()
+        }
+    }
+
+    fun obtenerUsuario(): Usuario {
+        return _usuario.value
+    }
+
+    fun validarCredenciales(email: String, password: String): Boolean {
+        // Asegurar que el usuario guardado esté cargado
+        if (_usuario.value.email.isEmpty()) {
+            cargarUsuarioGuardado()
+        }
+        val usuarioGuardado = _usuario.value
+        val emailCoincide = usuarioGuardado.email == email
+        val passwordCoincide = usuarioGuardado.password == password
+        return emailCoincide && passwordCoincide
+    }
+
+    fun cerrarSesion() {
+        _usuario.value = Usuario()
+    }
+
+    fun usuarioExistente(): Boolean {
+        return _usuario.value.email.isNotEmpty()
+    }
+}
+
