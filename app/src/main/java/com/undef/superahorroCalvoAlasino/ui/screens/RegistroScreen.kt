@@ -22,7 +22,7 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, compraViewModel: CompraViewModel) {
+fun RegistroScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, @Suppress("UNUSED_PARAMETER") compraViewModel: CompraViewModel) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -156,3 +156,4 @@ fun RegistroScreen(navController: NavController, usuarioViewModel: UsuarioViewMo
             }
         }
     }
+}
