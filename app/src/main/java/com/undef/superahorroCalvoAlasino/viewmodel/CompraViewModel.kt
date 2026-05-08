@@ -159,6 +159,30 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
         }
     }
 
+    // Agregar una nueva compra con productos detallados
+    fun agregarCompraConProductos(
+        supermercado: String,
+        fecha: String,
+        hora: String,
+        total: Double,
+        productos: List<Producto> = emptyList()
+    ) {
+        try {
+            val nuevaCompra = Compra(
+                id = proximoId++,
+                supermercado = supermercado,
+                fecha = fecha,
+                hora = hora,
+                total = total,
+                productos = productos
+            )
+            _compras.add(0, nuevaCompra)
+            guardarCompras()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     // Agregar producto a una compra existente
     fun agregarProductoACompra(
         compraId: Int,

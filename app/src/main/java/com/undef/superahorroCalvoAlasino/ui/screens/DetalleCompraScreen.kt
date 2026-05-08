@@ -132,29 +132,111 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(compra.productos) { producto ->
                             Card(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color.White)
                             ) {
-                                Row(
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
+                                    // Nombre del producto
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                producto.nombre,
+                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = Color(0xFF2E7D32)
+                                            )
+                                        }
                                         Text(
-                                            producto.nombre,
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.bodyLarge,
+                                            "$${String.format("%.2f", producto.precio)}",
+                                            fontWeight = FontWeight.ExtraBold,
+                                            style = MaterialTheme.typography.headlineSmall,
                                             color = Color(0xFF2E7D32)
                                         )
-                                        if (producto.descripcion.isNotEmpty()) {
+                                    }
+
+                                    Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFE0E0E0))
+
+                                    // ID del producto
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "ID Producto:",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            producto.id.toString(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF2E7D32),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    // Código
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "Código:",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            if (producto.codigo.isEmpty()) "N/A" else producto.codigo,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF2E7D32),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    // Descripción
+                                    if (producto.descripcion.isNotEmpty()) {
+                                        Column {
+                                            Text(
+                                                "Descripción:",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.Gray,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
                                             Text(
                                                 producto.descripcion,
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = Color.Gray
+                                                color = Color(0xFF2E7D32)
                                             )
                                         }
+                                    }
+
+                                    // Precio
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "Precio Unitario:",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            "$${String.format("%.2f", producto.precio)}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF2E7D32),
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
                                     }
                                 }
                             }
