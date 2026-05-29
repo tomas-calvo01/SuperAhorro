@@ -1,5 +1,6 @@
 package com.undef.superahorroCalvoAlasino.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,6 +31,7 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @Composable
 fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewModel: CompraViewModel) {
     val compra = compraViewModel.obtenerCompra(compraId)
+    val context = LocalContext.current
     var mostrarMenu by remember { mutableStateOf(false) }
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
@@ -66,7 +69,33 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                                     )
                                 },
                                 onClick = {
-                                    // TODO: Implementar compartir (Intent)
+                                    // Crear el texto de la compra para compartir
+                                    val mensajeCompartir = buildString {
+                                        append("🛒 Compra en ${compra.supermercado}\n")
+                                        append("📅 ${compra.fecha} - ${compra.hora}\n")
+                                        append("💰 Total: $${"%.2f".format(compra.total)}\n")
+                                        append("📦 ${compra.productos.size} producto${if (compra.productos.size != 1) "s" else ""}\n\n")
+
+                                        if (compra.productos.isNotEmpty()) {
+                                            append("Productos:\n")
+                                            compra.productos.forEach { producto ->
+                                                append("• ${producto.nombre} - $${"%.2f".format(producto.precio)}\n")
+                                            }
+                                            append("\n")
+                                        }
+
+                                        append("Compartido desde SuperAhorro")
+                                    }
+
+                                    // Crear Intent implícito siguiendo el patrón de la clase
+                                    val shareIntent = Intent(Intent.ACTION_SEND)
+                                    shareIntent.type = "text/plain"
+                                    shareIntent.putExtra(Intent.EXTRA_TEXT, mensajeCompartir)
+
+                                    // Crear el chooser para que el usuario elija la app
+                                    val chooser = Intent.createChooser(shareIntent, "Compartir compra usando")
+                                    context.startActivity(chooser)
+
                                     mostrarMenu = false
                                 }
                             )
