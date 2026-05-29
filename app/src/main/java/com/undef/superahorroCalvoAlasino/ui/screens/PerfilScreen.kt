@@ -8,6 +8,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +29,7 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 fun PerfilScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, compraViewModel: CompraViewModel) {
     val uiState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
     val usuario = uiState.usuario
+    var mostrarDialogoCerrarSesion by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -71,12 +75,7 @@ fun PerfilScreen(navController: NavController, usuarioViewModel: UsuarioViewMode
 
             Button(
                 onClick = {
-                    // Limpiar los datos de compras antes de cerrar sesión
-                    compraViewModel.limpiarCompras()
-                    usuarioViewModel.cerrarSesion()
-                    navController.navigate(NavRoutes.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    mostrarDialogoCerrarSesion = true
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
@@ -86,6 +85,49 @@ fun PerfilScreen(navController: NavController, usuarioViewModel: UsuarioViewMode
                 Text("Cerrar Sesión")
             }
         }
+    }
+
+    // Diálogo de confirmación para cerrar sesión
+    if (mostrarDialogoCerrarSesion) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoCerrarSesion = false },
+            icon = {
+                Icon(
+                    Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null,
+                    tint = Color(0xFF2E7D32)
+                )
+            },
+            title = {
+                Text(
+                    "Cerrar Sesión",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("¿Estás seguro que querés cerrar sesión?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        compraViewModel.limpiarCompras()
+                        usuarioViewModel.cerrarSesion()
+                        mostrarDialogoCerrarSesion = false
+                        navController.navigate(NavRoutes.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoCerrarSesion = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

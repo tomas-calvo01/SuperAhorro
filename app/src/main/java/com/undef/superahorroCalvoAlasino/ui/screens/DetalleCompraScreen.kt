@@ -6,8 +6,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +29,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @Composable
 fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewModel: CompraViewModel) {
     val compra = compraViewModel.obtenerCompra(compraId)
+    var mostrarMenu by remember { mutableStateOf(false) }
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -29,6 +39,67 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    if (compra != null) {
+                        IconButton(onClick = { mostrarMenu = true }) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "Más opciones",
+                                tint = Color.White
+                            )
+                        }
+
+                        // Menú dropdown
+                        DropdownMenu(
+                            expanded = mostrarMenu,
+                            onDismissRequest = { mostrarMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Compartir") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = null,
+                                        tint = Color(0xFF2E7D32)
+                                    )
+                                },
+                                onClick = {
+                                    // TODO: Implementar compartir (Intent)
+                                    mostrarMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Editar") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = null,
+                                        tint = Color(0xFF2E7D32)
+                                    )
+                                },
+                                onClick = {
+                                    // TODO: Navegar a editar compra
+                                    mostrarMenu = false
+                                }
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = { Text("Eliminar", color = Color(0xFFD32F2F)) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = Color(0xFFD32F2F)
+                                    )
+                                },
+                                onClick = {
+                                    mostrarDialogoEliminar = true
+                                    mostrarMenu = false
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -277,5 +348,46 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
             }
         }
     }
+
+    // Diálogo de confirmación para eliminar
+    if (mostrarDialogoEliminar && compra != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEliminar = false },
+            icon = {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color(0xFFD32F2F)
+                )
+            },
+            title = {
+                Text(
+                    "Eliminar Compra",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("Esta acción no se puede deshacer. ¿Estás seguro que querés eliminar esta compra?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // TODO: Implementar eliminación cuando haya Room
+                        mostrarDialogoEliminar = false
+                        navController.popBackStack()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoEliminar = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
