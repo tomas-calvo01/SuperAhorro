@@ -1,6 +1,5 @@
 package com.undef.superahorroCalvoAlasino.navigation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavType
@@ -13,14 +12,10 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @Composable
-fun AppNavGraph(context: Context? = null) {
+fun AppNavGraph() {
     val navController = rememberNavController()
-    val compraViewModel = remember {
-        CompraViewModel(context)
-    }
-    val usuarioViewModel = remember {
-        UsuarioViewModel(context)
-    }
+    val compraViewModel = remember { CompraViewModel() }
+    val usuarioViewModel = remember { UsuarioViewModel() }
 
     NavHost(
         navController = navController,

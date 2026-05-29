@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
@@ -22,7 +23,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistorialScreen(navController: NavController, compraViewModel: CompraViewModel) {
-    val compras = compraViewModel.compras
+    val uiState by compraViewModel.uiState.collectAsStateWithLifecycle()
+    val compras = uiState.compras
     var compraExpandidaId by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(

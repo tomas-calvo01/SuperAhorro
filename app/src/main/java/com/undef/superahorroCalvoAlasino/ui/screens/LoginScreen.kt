@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
@@ -20,6 +21,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 
 @Composable
 fun LoginScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, compraViewModel: CompraViewModel) {
+    val uiState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var mensajeError by remember { mutableStateOf("") }
@@ -83,8 +86,7 @@ fun LoginScreen(navController: NavController, usuarioViewModel: UsuarioViewModel
             onClick = {
                 if (email.isNotBlank() && password.isNotBlank()) {
                     if (usuarioViewModel.validarCredenciales(email, password)) {
-                        // Cargar las compras del usuario que inicia sesión
-                        compraViewModel.cargarComprasDelUsuario(email)
+                        // Por ahora sin persistencia - las compras se cargan con datos mockeados
                         navController.navigate(NavRoutes.Home.route) {
                             popUpTo(NavRoutes.Login.route) { inclusive = true }
                         }

@@ -1,131 +1,28 @@
 package com.undef.superahorroCalvoAlasino.viewmodel
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.runtime.mutableStateListOf
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.Producto
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class CompraViewModel(private var context: Context? = null) : ViewModel() {
-    // Lista de compras del usuario (comienza vacía)
-    private val _compras = mutableStateListOf<Compra>()
-    val compras: List<Compra> = _compras
+data class CompraUiState(
+    val compras: List<Compra> = emptyList(),
+    val compraSeleccionada: Compra? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
 
-    // ID auto-incremental para nuevas compras
+class CompraViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(CompraUiState())
+    val uiState: StateFlow<CompraUiState> = _uiState.asStateFlow()
+
     private var proximoId = 1
-    
-    private var sharedPreferences: SharedPreferences? = null
-    private var usuarioActualEmail: String? = null
-
-    @Suppress("UNUSED")
-    fun setContext(context: Context) {
-        this.context = context
-        if (sharedPreferences == null) {
-            sharedPreferences = context.getSharedPreferences("super_ahorro_compras", Context.MODE_PRIVATE)
-        }
-    }
-
-    // Cargar compras del usuario específico
-    fun cargarComprasDelUsuario(emailUsuario: String) {
-        if (sharedPreferences == null) {
-            context?.let {
-                sharedPreferences = it.getSharedPreferences("super_ahorro_compras", Context.MODE_PRIVATE)
-            }
-        }
-        
-        usuarioActualEmail = emailUsuario
-        _compras.clear()
-        proximoId = 1
-
-        sharedPreferences?.let {
-            val comprasJson = it.getString("compras_$emailUsuario", "[]")
-            if (comprasJson != null && comprasJson.isNotEmpty() && comprasJson != "[]") {
-                try {
-                    val jsonArray = JSONArray(comprasJson)
-                    for (i in 0 until jsonArray.length()) {
-                        val jsonCompra = jsonArray.getJSONObject(i)
-                        val id = jsonCompra.getInt("id")
-                        val supermercado = jsonCompra.getString("supermercado")
-                        val fecha = jsonCompra.getString("fecha")
-                        val hora = jsonCompra.getString("hora")
-                        val total = jsonCompra.getDouble("total")
-
-                        // Cargar productos
-                        val productosJson = jsonCompra.getJSONArray("productos")
-                        val productos = mutableListOf<Producto>()
-                        for (j in 0 until productosJson.length()) {
-                            val jsonProducto = productosJson.getJSONObject(j)
-                            productos.add(
-                                Producto(
-                                    id = jsonProducto.getInt("id"),
-                                    codigo = jsonProducto.getString("codigo"),
-                                    nombre = jsonProducto.getString("nombre"),
-                                    descripcion = jsonProducto.getString("descripcion"),
-                                    precio = jsonProducto.getDouble("precio")
-                                )
-                            )
-                        }
-
-                        _compras.add(Compra(id, supermercado, fecha, hora, total, productos))
-                        proximoId = maxOf(proximoId, id + 1)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    // Guardar compras del usuario actual
-    private fun guardarCompras() {
-        if (sharedPreferences == null) {
-            context?.let {
-                sharedPreferences = it.getSharedPreferences("super_ahorro_compras", Context.MODE_PRIVATE)
-            }
-        }
-        
-        sharedPreferences?.let {
-            if (usuarioActualEmail != null) {
-                try {
-                    val jsonArray = JSONArray()
-                    _compras.forEach { compra ->
-                        val jsonCompra = JSONObject()
-                        jsonCompra.put("id", compra.id)
-                        jsonCompra.put("supermercado", compra.supermercado)
-                        jsonCompra.put("fecha", compra.fecha)
-                        jsonCompra.put("hora", compra.hora)
-                        jsonCompra.put("total", compra.total)
-
-                        // Guardar productos
-                        val productosJson = JSONArray()
-                        compra.productos.forEach { producto ->
-                            val jsonProducto = JSONObject()
-                            jsonProducto.put("id", producto.id)
-                            jsonProducto.put("codigo", producto.codigo)
-                            jsonProducto.put("nombre", producto.nombre)
-                            jsonProducto.put("descripcion", producto.descripcion)
-                            jsonProducto.put("precio", producto.precio)
-                            productosJson.put(jsonProducto)
-                        }
-                        jsonCompra.put("productos", productosJson)
-                        jsonArray.put(jsonCompra)
-                    }
-                    it.edit {
-                        putString("compras_$usuarioActualEmail", jsonArray.toString())
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
 
     // Agregar una nueva compra con múltiples productos
-    @Suppress("UNUSED")
     fun agregarCompra(
         supermercado: String,
         fecha: String,
@@ -133,29 +30,41 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
         total: Double,
         productosAgregados: List<Pair<String, Double>> = emptyList()
     ) {
-        try {
-            val productos = productosAgregados.mapIndexed { index, (nombre, precio) ->
-                Producto(
-                    id = index + 1,
-                    codigo = "",
-                    nombre = nombre,
-                    descripcion = "",
-                    precio = precio
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            try {
+                val productos = productosAgregados.mapIndexed { index, (nombre, precio) ->
+                    Producto(
+                        id = index + 1,
+                        codigo = "",
+                        nombre = nombre,
+                        descripcion = "",
+                        precio = precio
+                    )
+                }
+
+                val nuevaCompra = Compra(
+                    id = proximoId++,
+                    supermercado = supermercado,
+                    fecha = fecha,
+                    hora = hora,
+                    total = total,
+                    productos = productos
+                )
+
+                val comprasActualizadas = listOf(nuevaCompra) + _uiState.value.compras
+                _uiState.value = _uiState.value.copy(
+                    compras = comprasActualizadas,
+                    isLoading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
                 )
             }
-            
-            val nuevaCompra = Compra(
-                id = proximoId++,
-                supermercado = supermercado,
-                fecha = fecha,
-                hora = hora,
-                total = total,
-                productos = productos
-            )
-            _compras.add(0, nuevaCompra)
-            guardarCompras()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -167,19 +76,31 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
         total: Double,
         productos: List<Producto> = emptyList()
     ) {
-        try {
-            val nuevaCompra = Compra(
-                id = proximoId++,
-                supermercado = supermercado,
-                fecha = fecha,
-                hora = hora,
-                total = total,
-                productos = productos
-            )
-            _compras.add(0, nuevaCompra)
-            guardarCompras()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            try {
+                val nuevaCompra = Compra(
+                    id = proximoId++,
+                    supermercado = supermercado,
+                    fecha = fecha,
+                    hora = hora,
+                    total = total,
+                    productos = productos
+                )
+
+                val comprasActualizadas = listOf(nuevaCompra) + _uiState.value.compras
+                _uiState.value = _uiState.value.copy(
+                    compras = comprasActualizadas,
+                    isLoading = false,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
         }
     }
 
@@ -191,40 +112,44 @@ class CompraViewModel(private var context: Context? = null) : ViewModel() {
         descripcion: String,
         precio: Double
     ) {
-        val compra = _compras.find { it.id == compraId }
-        if (compra != null) {
-            val nuevoProducto = Producto(
-                id = compra.productos.size + 1,
-                codigo = codigo,
-                nombre = nombre,
-                descripcion = descripcion,
-                precio = precio
-            )
-            val productosActualizados = compra.productos.toMutableList()
-            productosActualizados.add(nuevoProducto)
-            
-            // Actualizar la compra con los productos nuevos
-            val indexCompra = _compras.indexOf(compra)
-            _compras[indexCompra] = compra.copy(productos = productosActualizados)
-            guardarCompras()
+        viewModelScope.launch {
+            val compras = _uiState.value.compras.toMutableList()
+            val compraIndex = compras.indexOfFirst { it.id == compraId }
+
+            if (compraIndex != -1) {
+                val compra = compras[compraIndex]
+                val nuevoProducto = Producto(
+                    id = compra.productos.size + 1,
+                    codigo = codigo,
+                    nombre = nombre,
+                    descripcion = descripcion,
+                    precio = precio
+                )
+
+                val productosActualizados = compra.productos + nuevoProducto
+                compras[compraIndex] = compra.copy(productos = productosActualizados)
+
+                _uiState.value = _uiState.value.copy(compras = compras)
+            }
         }
     }
 
     // Obtener compra por ID
     fun obtenerCompra(compraId: Int): Compra? {
-        return _compras.find { it.id == compraId }
+        return _uiState.value.compras.find { it.id == compraId }
     }
 
     // Calcular total gastado
     fun calcularTotalGastado(): Double {
-        return _compras.sumOf { it.total }
+        return _uiState.value.compras.sumOf { it.total }
     }
 
     // Limpiar todas las compras (se usa al cerrar sesión)
     fun limpiarCompras() {
-        _compras.clear()
-        proximoId = 1
-        usuarioActualEmail = null
+        viewModelScope.launch {
+            _uiState.value = CompraUiState()
+            proximoId = 1
+        }
     }
 }
 

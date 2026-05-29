@@ -1,9 +1,11 @@
 package com.undef.superahorroCalvoAlasino.viewmodel
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class Usuario(
     val nombre: String = "",
@@ -11,91 +13,71 @@ data class Usuario(
     val password: String = ""
 )
 
-class UsuarioViewModel(private var context: Context? = null) : ViewModel() {
-    private val _usuario = mutableStateOf(Usuario())
-    val usuario = _usuario
-    private var sharedPreferences: SharedPreferences? = null
+data class UsuarioUiState(
+    val usuario: Usuario = Usuario(),
+    val isLoading: Boolean = false,
+    val isLoggedIn: Boolean = false,
+    val error: String? = null
+)
 
-    init {
-        if (context != null) {
-            initializePreferences()
-        }
-    }
-
-    fun setContext(context: Context) {
-        this.context = context
-        initializePreferences()
-    }
-
-    private fun initializePreferences() {
-        if (sharedPreferences == null) {
-            context?.let {
-                sharedPreferences = it.getSharedPreferences("super_ahorro_prefs", Context.MODE_PRIVATE)
-                cargarUsuarioGuardado()
-            }
-        }
-    }
-
-    fun cargarUsuarioGuardado() {
-        if (sharedPreferences == null) {
-            initializePreferences()
-        }
-        sharedPreferences?.let {
-            val nombre = it.getString("nombre", "") ?: ""
-            val email = it.getString("email", "") ?: ""
-            val password = it.getString("password", "") ?: ""
-            if (nombre.isNotEmpty() || email.isNotEmpty() || password.isNotEmpty()) {
-                _usuario.value = Usuario(nombre = nombre, email = email, password = password)
-            }
-        }
-    }
+class UsuarioViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(UsuarioUiState())
+    val uiState: StateFlow<UsuarioUiState> = _uiState.asStateFlow()
 
     fun registrarUsuario(nombre: String, email: String, password: String) {
-        if (sharedPreferences == null) {
-            initializePreferences()
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null
+            )
+            
+            // Simular registro (en la próxima entrega esto iría a un Repository)
+            _uiState.value = _uiState.value.copy(
+                usuario = Usuario(nombre = nombre, email = email, password = password),
+                isLoading = false,
+                error = null
+            )
         }
-        _usuario.value = Usuario(nombre = nombre, email = email, password = password)
-        guardarUsuarioEnPreferencias()
     }
 
     fun actualizarPerfil(nombre: String, email: String, nuevaPassword: String) {
-        _usuario.value = Usuario(nombre = nombre, email = email, password = nuevaPassword)
-        guardarUsuarioEnPreferencias()
-    }
-
-    private fun guardarUsuarioEnPreferencias() {
-        if (sharedPreferences == null) {
-            initializePreferences()
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null
+            )
+            
+            _uiState.value = _uiState.value.copy(
+                usuario = Usuario(nombre = nombre, email = email, password = nuevaPassword),
+                isLoading = false
+            )
         }
-        sharedPreferences?.edit()?.apply {
-            putString("nombre", _usuario.value.nombre)
-            putString("email", _usuario.value.email)
-            putString("password", _usuario.value.password)
-            apply()
-        }
-    }
-
-    fun obtenerUsuario(): Usuario {
-        return _usuario.value
     }
 
     fun validarCredenciales(email: String, password: String): Boolean {
-        // Asegurar que el usuario guardado esté cargado
-        if (_usuario.value.email.isEmpty()) {
-            cargarUsuarioGuardado()
+        val usuarioActual = _uiState.value.usuario
+        val esValido = usuarioActual.email == email && usuarioActual.password == password
+        
+        if (esValido) {
+            viewModelScope.launch {
+                _uiState.value = _uiState.value.copy(
+                    isLoggedIn = true,
+                    error = null
+                )
+            }
         }
-        val usuarioGuardado = _usuario.value
-        val emailCoincide = usuarioGuardado.email == email
-        val passwordCoincide = usuarioGuardado.password == password
-        return emailCoincide && passwordCoincide
+        
+        return esValido
     }
 
     fun cerrarSesion() {
-        _usuario.value = Usuario()
+        viewModelScope.launch {
+            _uiState.value = UsuarioUiState()
+        }
     }
 
     fun usuarioExistente(): Boolean {
-        return _usuario.value.email.isNotEmpty()
+        return _uiState.value.usuario.email.isNotEmpty()
     }
 }
 

@@ -61,6 +61,9 @@ dependencies {
 // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
+// Lifecycle runtime compose para collectAsStateWithLifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+
 // Icons extendidos (para íconos del bottom bar)
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
 }

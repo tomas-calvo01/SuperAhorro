@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
@@ -23,6 +24,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, @Suppress("UNUSED_PARAMETER") compraViewModel: CompraViewModel) {
+    val uiState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

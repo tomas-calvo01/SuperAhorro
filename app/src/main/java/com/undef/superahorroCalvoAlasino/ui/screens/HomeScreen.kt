@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
@@ -28,7 +30,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, compraViewModel: CompraViewModel) {
-    val compras = compraViewModel.compras
+    val uiState by compraViewModel.uiState.collectAsStateWithLifecycle()
+    val compras = uiState.compras
     val totalGastado = compraViewModel.calcularTotalGastado()
     val promedioPorCompra = if (compras.isNotEmpty()) totalGastado / compras.size else 0.0
 

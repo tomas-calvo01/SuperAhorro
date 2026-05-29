@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
@@ -26,7 +28,8 @@ import kotlin.math.sin
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EstadisticasScreen(navController: NavController, compraViewModel: CompraViewModel) {
-    val compras = compraViewModel.compras
+    val uiState by compraViewModel.uiState.collectAsStateWithLifecycle()
+    val compras = uiState.compras
     val totalGastado = compraViewModel.calcularTotalGastado()
 
     Scaffold(

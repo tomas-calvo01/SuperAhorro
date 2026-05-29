@@ -15,14 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarPerfilScreen(navController: NavController, usuarioViewModel: UsuarioViewModel) {
-    val usuarioActual = usuarioViewModel.obtenerUsuario()
-    
+    val uiState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    val usuarioActual = uiState.usuario
+
     var nombre by remember { mutableStateOf(usuarioActual.nombre) }
     var email by remember { mutableStateOf(usuarioActual.email) }
     var passwordActual by remember { mutableStateOf("") }
@@ -31,6 +33,14 @@ fun EditarPerfilScreen(navController: NavController, usuarioViewModel: UsuarioVi
     var mensajeError by remember { mutableStateOf("") }
     var mensajeExito by remember { mutableStateOf("") }
     var errorPasswordActual by remember { mutableStateOf(false) }
+
+    // Sincronizar campos del formulario cuando cambie el usuario en el estado
+    LaunchedEffect(usuarioActual) {
+        if (nombre.isEmpty() && email.isEmpty()) {
+            nombre = usuarioActual.nombre
+            email = usuarioActual.email
+        }
+    }
 
     Scaffold(
         topBar = {

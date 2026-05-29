@@ -7,12 +7,14 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
@@ -22,7 +24,8 @@ import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(navController: NavController, usuarioViewModel: UsuarioViewModel, compraViewModel: CompraViewModel) {
-    val usuario = usuarioViewModel.obtenerUsuario()
+    val uiState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    val usuario = uiState.usuario
 
     Scaffold(
         topBar = {
