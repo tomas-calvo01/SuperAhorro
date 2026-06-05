@@ -86,7 +86,7 @@ fun LoginScreen(navController: NavController, usuarioViewModel: UsuarioViewModel
             onClick = {
                 if (email.isNotBlank() && password.isNotBlank()) {
                     if (usuarioViewModel.validarCredenciales(email, password)) {
-                        // Por ahora sin persistencia - las compras se cargan con datos mockeados
+                        compraViewModel.setCurrentUser(email)
                         navController.navigate(NavRoutes.Home.route) {
                             popUpTo(NavRoutes.Login.route) { inclusive = true }
                         }

@@ -16,6 +16,7 @@ class UserPreferencesRepository(context: Context) {
         private val IS_LOGGED_IN = booleanPreferencesKey("IS_LOGGED_IN")
         private val USER_EMAIL = stringPreferencesKey("USER_EMAIL")
         private val USER_NAME = stringPreferencesKey("USER_NAME")
+        private val USER_PASSWORD = stringPreferencesKey("USER_PASSWORD")
         private val DARK_MODE = booleanPreferencesKey("DARK_MODE")
         private val LAST_SORT_ORDER = stringPreferencesKey("LAST_SORT_ORDER")
     }
@@ -32,12 +33,24 @@ class UserPreferencesRepository(context: Context) {
         prefs[USER_NAME] ?: ""
     }
 
+    val userPassword: Flow<String> = dataStore.data.map { prefs ->
+        prefs[USER_PASSWORD] ?: ""
+    }
+
     val darkMode: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[DARK_MODE] ?: false
     }
 
     val lastSortOrder: Flow<String> = dataStore.data.map { prefs ->
         prefs[LAST_SORT_ORDER] ?: "fecha_desc"
+    }
+
+    suspend fun saveCredentials(email: String, nombre: String, password: String) {
+        dataStore.edit { prefs ->
+            prefs[USER_EMAIL] = email
+            prefs[USER_NAME] = nombre
+            prefs[USER_PASSWORD] = password
+        }
     }
 
     suspend fun saveSession(email: String, name: String) {
@@ -51,8 +64,7 @@ class UserPreferencesRepository(context: Context) {
     suspend fun clearSession() {
         dataStore.edit { prefs ->
             prefs[IS_LOGGED_IN] = false
-            prefs.remove(USER_EMAIL)
-            prefs.remove(USER_NAME)
+            // Las credenciales persisten para permitir re-login
         }
     }
 

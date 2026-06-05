@@ -1,6 +1,9 @@
 package com.undef.superahorroCalvoAlasino.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
@@ -26,7 +29,14 @@ fun AppNavGraph(
     val compraViewModel = remember { CompraViewModel(compraRepository, networkRepository) }
     val buscarProductoViewModel = remember { BuscarProductoViewModel(networkRepository) }
     val userPrefsRepo = remember { UserPreferencesRepository(context) }
-    val usuarioViewModel = remember { UsuarioViewModel(context, userPrefsRepo) }
+    val usuarioViewModel = remember { UsuarioViewModel(userPrefsRepo) }
+
+    // Cuando el email del usuario cambia (login / logout / inicio de sesión guardada),
+    // redirige CompraViewModel para cargar sólo las compras de ese usuario.
+    val usuarioUiState by usuarioViewModel.uiState.collectAsState()
+    LaunchedEffect(usuarioUiState.usuario.email) {
+        compraViewModel.setCurrentUser(usuarioUiState.usuario.email)
+    }
 
     NavHost(
         navController = navController,

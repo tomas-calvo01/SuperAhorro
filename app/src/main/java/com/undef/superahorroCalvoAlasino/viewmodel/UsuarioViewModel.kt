@@ -1,13 +1,13 @@
 package com.undef.superahorroCalvoAlasino.viewmodel
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.undef.superahorroCalvoAlasino.data.preferences.UserPreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -17,90 +17,55 @@ data class Usuario(
     val password: String = ""
 )
 
+data class UsuarioUiState(
+    val usuario: Usuario = Usuario(),
+    val isLoggedIn: Boolean = false
+)
+
 class UsuarioViewModel(
-    private var context: Context? = null,
     private val repo: UserPreferencesRepository
 ) : ViewModel() {
 
-    private val _usuario = mutableStateOf(Usuario())
-    val usuario = _usuario
-
-    private var sharedPreferences: SharedPreferences? = null
+    private val _uiState = MutableStateFlow(UsuarioUiState())
+    val uiState: StateFlow<UsuarioUiState> = _uiState.asStateFlow()
 
     val isLoggedIn: StateFlow<Boolean> = repo.isLoggedIn
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     init {
-        if (context != null) {
-            initializePreferences()
-        }
-    }
-
-    fun setContext(context: Context) {
-        this.context = context
-        initializePreferences()
-    }
-
-    private fun initializePreferences() {
-        if (sharedPreferences == null) {
-            context?.let {
-                sharedPreferences = it.getSharedPreferences("super_ahorro_prefs", Context.MODE_PRIVATE)
-                cargarUsuarioGuardado()
-            }
-        }
-    }
-
-    fun cargarUsuarioGuardado() {
-        if (sharedPreferences == null) {
-            initializePreferences()
-        }
-        sharedPreferences?.let {
-            val nombre = it.getString("nombre", "") ?: ""
-            val email = it.getString("email", "") ?: ""
-            val password = it.getString("password", "") ?: ""
-            if (nombre.isNotEmpty() || email.isNotEmpty() || password.isNotEmpty()) {
-                _usuario.value = Usuario(nombre = nombre, email = email, password = password)
+        viewModelScope.launch {
+            combine(
+                repo.userName,
+                repo.userEmail,
+                repo.userPassword,
+                repo.isLoggedIn
+            ) { nombre, email, password, loggedIn ->
+                UsuarioUiState(
+                    usuario = Usuario(nombre = nombre, email = email, password = password),
+                    isLoggedIn = loggedIn
+                )
+            }.collect { state ->
+                _uiState.value = state
             }
         }
     }
 
     fun registrarUsuario(nombre: String, email: String, password: String) {
-        if (sharedPreferences == null) {
-            initializePreferences()
-        }
-        _usuario.value = Usuario(nombre = nombre, email = email, password = password)
-        guardarUsuarioEnPreferencias()
         viewModelScope.launch {
+            repo.saveCredentials(email, nombre, password)
             repo.saveSession(email, nombre)
         }
     }
 
     fun actualizarPerfil(nombre: String, email: String, nuevaPassword: String) {
-        _usuario.value = Usuario(nombre = nombre, email = email, password = nuevaPassword)
-        guardarUsuarioEnPreferencias()
-    }
-
-    private fun guardarUsuarioEnPreferencias() {
-        if (sharedPreferences == null) {
-            initializePreferences()
+        viewModelScope.launch {
+            repo.saveCredentials(email, nombre, nuevaPassword)
+            repo.saveSession(email, nombre)
         }
-        sharedPreferences?.edit()?.apply {
-            putString("nombre", _usuario.value.nombre)
-            putString("email", _usuario.value.email)
-            putString("password", _usuario.value.password)
-            apply()
-        }
-    }
-
-    fun obtenerUsuario(): Usuario {
-        return _usuario.value
     }
 
     fun validarCredenciales(email: String, password: String): Boolean {
-        if (_usuario.value.email.isEmpty()) {
-            cargarUsuarioGuardado()
-        }
-        val usuarioGuardado = _usuario.value
+        val usuarioGuardado = _uiState.value.usuario
         val result = usuarioGuardado.email == email && usuarioGuardado.password == password
         if (result) {
             viewModelScope.launch {
@@ -111,15 +76,14 @@ class UsuarioViewModel(
     }
 
     fun cerrarSesion() {
-        _usuario.value = Usuario()
         viewModelScope.launch {
             repo.clearSession()
         }
     }
 
-    fun usuarioExistente(): Boolean {
-        return _usuario.value.email.isNotEmpty()
-    }
+    fun usuarioExistente(): Boolean = _uiState.value.usuario.email.isNotEmpty()
+
+    fun obtenerUsuario(): Usuario = _uiState.value.usuario
 
     suspend fun checkInitialLoginState(): Boolean = repo.readInitialLoginState()
 }

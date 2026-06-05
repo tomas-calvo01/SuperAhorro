@@ -7,6 +7,7 @@ import com.undef.superahorroCalvoAlasino.data.repository.NetworkRepository
 import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.Producto
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,10 +31,20 @@ class CompraViewModel(
     private val _mensajeRegistroRemoto = MutableStateFlow<String?>(null)
     val mensajeRegistroRemoto: StateFlow<String?> = _mensajeRegistroRemoto.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            repository.observarTodasLasCompras().collect { comprasList ->
-                _uiState.value = _uiState.value.copy(compras = comprasList)
+    private var currentUserEmail: String = ""
+    private var collectJob: Job? = null
+
+    fun setCurrentUser(email: String) {
+        if (email == currentUserEmail && collectJob?.isActive == true) return
+        currentUserEmail = email
+        collectJob?.cancel()
+        collectJob = viewModelScope.launch {
+            if (email.isNotEmpty()) {
+                repository.observarComprasDeUsuario(email).collect { comprasList ->
+                    _uiState.value = _uiState.value.copy(compras = comprasList)
+                }
+            } else {
+                _uiState.value = _uiState.value.copy(compras = emptyList())
             }
         }
     }
@@ -52,7 +63,10 @@ class CompraViewModel(
                     Producto(id = 0, codigo = "", nombre = nombre, descripcion = "", precio = precio)
                 }
                 repository.guardarCompra(
-                    Compra(id = 0, supermercado = supermercado, fecha = fecha, hora = hora, total = total, productos = productos)
+                    Compra(
+                        id = 0, supermercado = supermercado, fecha = fecha, hora = hora,
+                        total = total, productos = productos, usuarioEmail = currentUserEmail
+                    )
                 )
                 _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
@@ -72,7 +86,10 @@ class CompraViewModel(
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 repository.guardarCompra(
-                    Compra(id = 0, supermercado = supermercado, fecha = fecha, hora = hora, total = total, productos = productos)
+                    Compra(
+                        id = 0, supermercado = supermercado, fecha = fecha, hora = hora,
+                        total = total, productos = productos, usuarioEmail = currentUserEmail
+                    )
                 )
                 _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
@@ -103,6 +120,9 @@ class CompraViewModel(
         _uiState.value.compras.sumOf { it.total }
 
     fun limpiarCompras() {
+        collectJob?.cancel()
+        collectJob = null
+        currentUserEmail = ""
         _uiState.value = CompraUiState()
     }
 
