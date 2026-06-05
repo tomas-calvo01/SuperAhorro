@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +25,31 @@ fun NuevoProductoScreen(navController: NavController, compraId: Int, compraViewM
     var descripcion by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
 
+    // Leer datos pre-rellenados que vengan de BuscarProductoScreen via savedStateHandle
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val prefilledNombre by (savedStateHandle?.getStateFlow("busqueda_nombre", "") ?: MutableStateFlow("")).collectAsState()
+    val prefilledCodigo by (savedStateHandle?.getStateFlow("busqueda_codigo", "") ?: MutableStateFlow("")).collectAsState()
+    val prefilledDescripcion by (savedStateHandle?.getStateFlow("busqueda_descripcion", "") ?: MutableStateFlow("")).collectAsState()
+
+    LaunchedEffect(prefilledNombre) {
+        if (prefilledNombre.isNotEmpty()) {
+            nombre = prefilledNombre
+            savedStateHandle?.remove<String>("busqueda_nombre")
+        }
+    }
+    LaunchedEffect(prefilledCodigo) {
+        if (prefilledCodigo.isNotEmpty()) {
+            codigo = prefilledCodigo
+            savedStateHandle?.remove<String>("busqueda_codigo")
+        }
+    }
+    LaunchedEffect(prefilledDescripcion) {
+        if (prefilledDescripcion.isNotEmpty()) {
+            descripcion = prefilledDescripcion
+            savedStateHandle?.remove<String>("busqueda_descripcion")
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -30,6 +57,15 @@ fun NuevoProductoScreen(navController: NavController, compraId: Int, compraViewM
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate(NavRoutes.BuscarProducto.withId(compraId)) }) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Buscar producto",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -100,13 +136,9 @@ fun NuevoProductoScreen(navController: NavController, compraId: Int, compraViewM
 
             Button(
                 onClick = {
-                    // Validar que los campos no estén vacíos
-                    if (nombre.isNotBlank() && codigo.isNotBlank() && 
+                    if (nombre.isNotBlank() && codigo.isNotBlank() &&
                         descripcion.isNotBlank() && precio.isNotBlank()) {
-                        
                         val precioDouble = precio.toDoubleOrNull() ?: 0.0
-                        
-                        // Guardar el producto en el ViewModel
                         compraViewModel.agregarProductoACompra(
                             compraId = compraId,
                             codigo = codigo,
@@ -114,8 +146,6 @@ fun NuevoProductoScreen(navController: NavController, compraId: Int, compraViewM
                             descripcion = descripcion,
                             precio = precioDouble
                         )
-                        
-                        // Volver a Detalle Compra
                         navController.popBackStack()
                     }
                 },

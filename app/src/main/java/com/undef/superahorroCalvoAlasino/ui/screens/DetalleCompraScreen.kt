@@ -11,18 +11,16 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
@@ -34,8 +32,18 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
     val context = LocalContext.current
     var mostrarMenu by remember { mutableStateOf(false) }
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val mensajeRegistro by compraViewModel.mensajeRegistroRemoto.collectAsStateWithLifecycle()
+
+    LaunchedEffect(mensajeRegistro) {
+        mensajeRegistro?.let {
+            snackbarHostState.showSnackbar(it)
+            compraViewModel.limpiarMensajeRegistro()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Detalle Compra #${compra?.id ?: compraId}") },
@@ -54,7 +62,6 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                             )
                         }
 
-                        // Menú dropdown
                         DropdownMenu(
                             expanded = mostrarMenu,
                             onDismissRequest = { mostrarMenu = false }
@@ -62,20 +69,14 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                             DropdownMenuItem(
                                 text = { Text("Compartir") },
                                 leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Share,
-                                        contentDescription = null,
-                                        tint = Color(0xFF2E7D32)
-                                    )
+                                    Icon(Icons.Default.Share, contentDescription = null, tint = Color(0xFF2E7D32))
                                 },
                                 onClick = {
-                                    // Crear el texto de la compra para compartir
                                     val mensajeCompartir = buildString {
                                         append("🛒 Compra en ${compra.supermercado}\n")
                                         append("📅 ${compra.fecha} - ${compra.hora}\n")
                                         append("💰 Total: $${"%.2f".format(compra.total)}\n")
                                         append("📦 ${compra.productos.size} producto${if (compra.productos.size != 1) "s" else ""}\n\n")
-
                                         if (compra.productos.isNotEmpty()) {
                                             append("Productos:\n")
                                             compra.productos.forEach { producto ->
@@ -83,45 +84,38 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                                             }
                                             append("\n")
                                         }
-
                                         append("Compartido desde SuperAhorro")
                                     }
-
-                                    // Crear Intent implícito siguiendo el patrón de la clase
-                                    val shareIntent = Intent(Intent.ACTION_SEND)
-                                    shareIntent.type = "text/plain"
-                                    shareIntent.putExtra(Intent.EXTRA_TEXT, mensajeCompartir)
-
-                                    // Crear el chooser para que el usuario elija la app
-                                    val chooser = Intent.createChooser(shareIntent, "Compartir compra usando")
-                                    context.startActivity(chooser)
-
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, mensajeCompartir)
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, "Compartir compra usando"))
+                                    mostrarMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Sincronizar") },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Sync, contentDescription = null, tint = Color(0xFF2E7D32))
+                                },
+                                onClick = {
+                                    compraViewModel.registrarCompraRemota(compra)
                                     mostrarMenu = false
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Editar") },
                                 leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = null,
-                                        tint = Color(0xFF2E7D32)
-                                    )
+                                    Icon(Icons.Default.Edit, contentDescription = null, tint = Color(0xFF2E7D32))
                                 },
-                                onClick = {
-                                    // TODO: Navegar a editar compra
-                                    mostrarMenu = false
-                                }
+                                onClick = { mostrarMenu = false }
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
                                 text = { Text("Eliminar", color = Color(0xFFD32F2F)) },
                                 leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = Color(0xFFD32F2F)
-                                    )
+                                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFD32F2F))
                                 },
                                 onClick = {
                                     mostrarDialogoEliminar = true
@@ -159,11 +153,7 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    "Compra no encontrada",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.Gray
-                )
+                Text("Compra no encontrada", style = MaterialTheme.typography.titleLarge, color = Color.Gray)
             }
         } else {
             Column(
@@ -172,7 +162,6 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                // Info Compra
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -182,13 +171,8 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Supermercado", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Text(compra.supermercado, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
-
                         Spacer(Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Column {
                                 Text("Fecha", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                                 Text(compra.fecha, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
@@ -198,9 +182,7 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                                 Text(compra.hora, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
                             }
                         }
-
                         Spacer(Modifier.height(12.dp))
-
                         Text("Total", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Text(
                             "$ ${compra.total}",
@@ -211,7 +193,6 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                     }
                 }
 
-                // Productos
                 Text(
                     "Productos (${compra.productos.size})",
                     style = MaterialTheme.typography.titleMedium,
@@ -241,136 +222,56 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                                         .padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    // Nombre del producto
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                producto.nombre,
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = Color(0xFF2E7D32)
-                                            )
+                                            Text(producto.nombre, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge, color = Color(0xFF2E7D32))
                                         }
-                                        Text(
-                                            "$${String.format("%.2f", producto.precio)}",
-                                            fontWeight = FontWeight.ExtraBold,
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            color = Color(0xFF2E7D32)
-                                        )
+                                        Text("$${String.format("%.2f", producto.precio)}", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineSmall, color = Color(0xFF2E7D32))
                                     }
-
                                     Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFE0E0E0))
-
-                                    // ID del producto
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            "ID Producto:",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Text(
-                                            producto.id.toString(),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF2E7D32),
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text("ID Producto:", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+                                        Text(producto.id.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
                                     }
-
-                                    // Código
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            "Código:",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Text(
-                                            if (producto.codigo.isEmpty()) "N/A" else producto.codigo,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF2E7D32),
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text("Código:", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+                                        Text(if (producto.codigo.isEmpty()) "N/A" else producto.codigo, style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
                                     }
-
-                                    // Descripción
                                     if (producto.descripcion.isNotEmpty()) {
                                         Column {
-                                            Text(
-                                                "Descripción:",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = Color.Gray,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Text(
-                                                producto.descripcion,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = Color(0xFF2E7D32)
-                                            )
+                                            Text("Descripción:", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+                                            Text(producto.descripcion, style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32))
                                         }
                                     }
-
-                                    // Precio
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            "Precio Unitario:",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Text(
-                                            "$${String.format("%.2f", producto.precio)}",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF2E7D32),
-                                            fontWeight = FontWeight.ExtraBold
-                                        )
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text("Precio Unitario:", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+                                        Text("$${String.format("%.2f", producto.precio)}", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
                             }
                         }
                     }
-                    
+
                     Spacer(Modifier.height(16.dp))
-                    
-                    // Resumen
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32))
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
                                 Text("Total de compra:", color = Color.White, style = MaterialTheme.typography.bodyMedium)
-                                Text(
-                                    "${compra.productos.size} producto${if (compra.productos.size != 1) "s" else ""}",
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                Text("${compra.productos.size} producto${if (compra.productos.size != 1) "s" else ""}", color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.bodySmall)
                             }
-                            Text(
-                                "$ ${"%.2f".format(compra.total)}",
-                                fontWeight = FontWeight.ExtraBold,
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = Color.White
-                            )
+                            Text("$ ${"%.2f".format(compra.total)}", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineSmall, color = Color.White)
                         }
                     }
                 }
@@ -378,45 +279,24 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
         }
     }
 
-    // Diálogo de confirmación para eliminar
     if (mostrarDialogoEliminar && compra != null) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoEliminar = false },
-            icon = {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = Color(0xFFD32F2F)
-                )
-            },
-            title = {
-                Text(
-                    "Eliminar Compra",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text("Esta acción no se puede deshacer. ¿Estás seguro que querés eliminar esta compra?")
-            },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFD32F2F)) },
+            title = { Text("Eliminar Compra", fontWeight = FontWeight.Bold) },
+            text = { Text("Esta acción no se puede deshacer. ¿Estás seguro que querés eliminar esta compra?") },
             confirmButton = {
                 Button(
                     onClick = {
-                        // TODO: Implementar eliminación cuando haya Room
                         mostrarDialogoEliminar = false
                         navController.popBackStack()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
-                ) {
-                    Text("Eliminar")
-                }
+                ) { Text("Eliminar") }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarDialogoEliminar = false }) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { mostrarDialogoEliminar = false }) { Text("Cancelar") }
             }
         )
     }
 }
-
-

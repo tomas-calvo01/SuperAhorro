@@ -3,8 +3,10 @@ package com.undef.superahorroCalvoAlasino.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.undef.superahorroCalvoAlasino.data.repository.CompraRepository
+import com.undef.superahorroCalvoAlasino.data.repository.NetworkRepository
 import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.Producto
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +20,15 @@ data class CompraUiState(
 )
 
 class CompraViewModel(
-    private val repository: CompraRepository
+    private val repository: CompraRepository,
+    private val networkRepository: NetworkRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CompraUiState())
     val uiState: StateFlow<CompraUiState> = _uiState.asStateFlow()
+
+    private val _mensajeRegistroRemoto = MutableStateFlow<String?>(null)
+    val mensajeRegistroRemoto: StateFlow<String?> = _mensajeRegistroRemoto.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -97,8 +103,30 @@ class CompraViewModel(
         _uiState.value.compras.sumOf { it.total }
 
     fun limpiarCompras() {
-        // Las compras persisten en Room. Se usa al cerrar sesión para limpiar
-        // el estado en memoria; los datos en DB se mantienen para el próximo login.
         _uiState.value = CompraUiState()
+    }
+
+    fun registrarCompraRemota(compra: Compra) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = networkRepository.registrarCompraRemota(
+                usuarioEmail = compra.usuarioEmail,
+                supermercado = compra.supermercado,
+                total = compra.total,
+                fecha = compra.fecha,
+                cantidadProductos = compra.productos.size
+            )
+            result.fold(
+                onSuccess = { response ->
+                    _mensajeRegistroRemoto.value = "Compra sincronizada correctamente (ID: ${response.id})"
+                },
+                onFailure = { error ->
+                    _mensajeRegistroRemoto.value = "Error al sincronizar: ${error.message}"
+                }
+            )
+        }
+    }
+
+    fun limpiarMensajeRegistro() {
+        _mensajeRegistroRemoto.value = null
     }
 }

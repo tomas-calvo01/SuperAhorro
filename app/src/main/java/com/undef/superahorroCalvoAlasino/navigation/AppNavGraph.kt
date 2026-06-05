@@ -10,15 +10,21 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.undef.superahorroCalvoAlasino.data.preferences.UserPreferencesRepository
 import com.undef.superahorroCalvoAlasino.data.repository.CompraRepository
+import com.undef.superahorroCalvoAlasino.data.repository.NetworkRepository
 import com.undef.superahorroCalvoAlasino.ui.screens.*
+import com.undef.superahorroCalvoAlasino.viewmodel.BuscarProductoViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @Composable
-fun AppNavGraph(compraRepository: CompraRepository) {
+fun AppNavGraph(
+    compraRepository: CompraRepository,
+    networkRepository: NetworkRepository
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val compraViewModel = remember { CompraViewModel(compraRepository) }
+    val compraViewModel = remember { CompraViewModel(compraRepository, networkRepository) }
+    val buscarProductoViewModel = remember { BuscarProductoViewModel(networkRepository) }
     val userPrefsRepo = remember { UserPreferencesRepository(context) }
     val usuarioViewModel = remember { UsuarioViewModel(context, userPrefsRepo) }
 
@@ -52,6 +58,14 @@ fun AppNavGraph(compraRepository: CompraRepository) {
         ) { backStackEntry ->
             val compraId = backStackEntry.arguments?.getInt("compraId") ?: 0
             NuevoProductoScreen(navController, compraId, compraViewModel)
+        }
+
+        composable(
+            route = NavRoutes.BuscarProducto.route,
+            arguments = listOf(navArgument("compraId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val compraId = backStackEntry.arguments?.getInt("compraId") ?: 0
+            BuscarProductoScreen(navController, compraId, buscarProductoViewModel)
         }
     }
 }

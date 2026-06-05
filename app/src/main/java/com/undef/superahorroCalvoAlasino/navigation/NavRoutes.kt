@@ -17,5 +17,8 @@ sealed class NavRoutes(val route: String) {
     object Perfil : NavRoutes("perfil")
     object EditarPerfil : NavRoutes("editar_perfil")
     object Settings : NavRoutes("settings")
+    object BuscarProducto : NavRoutes("buscar_producto/{compraId}") {
+        fun withId(id: Int) = "buscar_producto/$id"
+    }
 }
 
