@@ -1,54 +1,36 @@
 package com.undef.superahorroCalvoAlasino.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
-import kotlinx.coroutines.delay
+import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(navController: NavController, usuarioViewModel: UsuarioViewModel) {
+    val isLoggedIn by usuarioViewModel.isLoggedIn.collectAsState()
+
     LaunchedEffect(Unit) {
-        delay(2000)
-        navController.navigate(NavRoutes.Login.route) {
+        val loggedIn = usuarioViewModel.checkInitialLoginState()
+        navController.navigate(
+            if (loggedIn) NavRoutes.Home.route else NavRoutes.Login.route
+        ) {
             popUpTo(NavRoutes.Splash.route) { inclusive = true }
         }
     }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF2E7D32)),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(80.dp)
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "SUPER AHORRO",
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Controlá tus gastos",
-                color = Color.White.copy(alpha = 0.8f)
-            )
-        }
+        CircularProgressIndicator(color = Color(0xFF2E7D32))
     }
 }

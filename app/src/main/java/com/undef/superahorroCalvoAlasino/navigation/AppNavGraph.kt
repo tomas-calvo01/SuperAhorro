@@ -8,20 +8,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.undef.superahorroCalvoAlasino.ui.screens.*
+import androidx.compose.ui.platform.LocalContext
+import com.undef.superahorroCalvoAlasino.data.preferences.UserPreferencesRepository
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    val compraViewModel = remember { CompraViewModel() }
-    val usuarioViewModel = remember { UsuarioViewModel() }
+    val context = LocalContext.current
+    val compraViewModel = remember { CompraViewModel(context) }
+    val userPrefsRepo = remember { UserPreferencesRepository(context!!) }
+    val usuarioViewModel = remember { UsuarioViewModel(context, userPrefsRepo) }
 
     NavHost(
         navController = navController,
         startDestination = NavRoutes.Splash.route
     ) {
-        composable(NavRoutes.Splash.route) { SplashScreen(navController) }
+        composable(NavRoutes.Splash.route) { SplashScreen(navController, usuarioViewModel) }
         composable(NavRoutes.Login.route) { LoginScreen(navController, usuarioViewModel, compraViewModel) }
         composable(NavRoutes.Registro.route) { RegistroScreen(navController, usuarioViewModel, compraViewModel) }
         composable(NavRoutes.Home.route) { HomeScreen(navController, compraViewModel) }
