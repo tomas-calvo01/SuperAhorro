@@ -8,7 +8,8 @@ data class Compra(
     val fecha: String,
     val hora: String,
     val total: Double,
-    val productos: List<Producto> = emptyList()
+    val productos: List<Producto> = emptyList(),
+    val usuarioEmail: String = ""
 )
 
 data class Producto(
@@ -16,7 +17,8 @@ data class Producto(
     val codigo: String,
     val nombre: String,
     val descripcion: String,
-    val precio: Double
+    val precio: Double,
+    val cantidad: Int = 1
 )
 
 data class Usuario(

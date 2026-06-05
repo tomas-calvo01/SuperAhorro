@@ -2,6 +2,7 @@ package com.undef.superahorroCalvoAlasino.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.undef.superahorroCalvoAlasino.data.repository.CompraRepository
 import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.Producto
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,13 +17,21 @@ data class CompraUiState(
     val error: String? = null
 )
 
-class CompraViewModel : ViewModel() {
+class CompraViewModel(
+    private val repository: CompraRepository
+) : ViewModel() {
+
     private val _uiState = MutableStateFlow(CompraUiState())
     val uiState: StateFlow<CompraUiState> = _uiState.asStateFlow()
 
-    private var proximoId = 1
+    init {
+        viewModelScope.launch {
+            repository.observarTodasLasCompras().collect { comprasList ->
+                _uiState.value = _uiState.value.copy(compras = comprasList)
+            }
+        }
+    }
 
-    // Agregar una nueva compra con múltiples productos
     fun agregarCompra(
         supermercado: String,
         fecha: String,
@@ -32,43 +41,20 @@ class CompraViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-
             try {
-                val productos = productosAgregados.mapIndexed { index, (nombre, precio) ->
-                    Producto(
-                        id = index + 1,
-                        codigo = "",
-                        nombre = nombre,
-                        descripcion = "",
-                        precio = precio
-                    )
+                val productos = productosAgregados.map { (nombre, precio) ->
+                    Producto(id = 0, codigo = "", nombre = nombre, descripcion = "", precio = precio)
                 }
-
-                val nuevaCompra = Compra(
-                    id = proximoId++,
-                    supermercado = supermercado,
-                    fecha = fecha,
-                    hora = hora,
-                    total = total,
-                    productos = productos
+                repository.guardarCompra(
+                    Compra(id = 0, supermercado = supermercado, fecha = fecha, hora = hora, total = total, productos = productos)
                 )
-
-                val comprasActualizadas = listOf(nuevaCompra) + _uiState.value.compras
-                _uiState.value = _uiState.value.copy(
-                    compras = comprasActualizadas,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
             }
         }
     }
 
-    // Agregar una nueva compra con productos detallados
     fun agregarCompraConProductos(
         supermercado: String,
         fecha: String,
@@ -78,33 +64,17 @@ class CompraViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-
             try {
-                val nuevaCompra = Compra(
-                    id = proximoId++,
-                    supermercado = supermercado,
-                    fecha = fecha,
-                    hora = hora,
-                    total = total,
-                    productos = productos
+                repository.guardarCompra(
+                    Compra(id = 0, supermercado = supermercado, fecha = fecha, hora = hora, total = total, productos = productos)
                 )
-
-                val comprasActualizadas = listOf(nuevaCompra) + _uiState.value.compras
-                _uiState.value = _uiState.value.copy(
-                    compras = comprasActualizadas,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
             }
         }
     }
 
-    // Agregar producto a una compra existente
     fun agregarProductoACompra(
         compraId: Int,
         codigo: String,
@@ -113,43 +83,22 @@ class CompraViewModel : ViewModel() {
         precio: Double
     ) {
         viewModelScope.launch {
-            val compras = _uiState.value.compras.toMutableList()
-            val compraIndex = compras.indexOfFirst { it.id == compraId }
-
-            if (compraIndex != -1) {
-                val compra = compras[compraIndex]
-                val nuevoProducto = Producto(
-                    id = compra.productos.size + 1,
-                    codigo = codigo,
-                    nombre = nombre,
-                    descripcion = descripcion,
-                    precio = precio
-                )
-
-                val productosActualizados = compra.productos + nuevoProducto
-                compras[compraIndex] = compra.copy(productos = productosActualizados)
-
-                _uiState.value = _uiState.value.copy(compras = compras)
-            }
+            repository.agregarProducto(
+                Producto(id = 0, codigo = codigo, nombre = nombre, descripcion = descripcion, precio = precio),
+                compraId
+            )
         }
     }
 
-    // Obtener compra por ID
-    fun obtenerCompra(compraId: Int): Compra? {
-        return _uiState.value.compras.find { it.id == compraId }
-    }
+    fun obtenerCompra(compraId: Int): Compra? =
+        _uiState.value.compras.find { it.id == compraId }
 
-    // Calcular total gastado
-    fun calcularTotalGastado(): Double {
-        return _uiState.value.compras.sumOf { it.total }
-    }
+    fun calcularTotalGastado(): Double =
+        _uiState.value.compras.sumOf { it.total }
 
-    // Limpiar todas las compras (se usa al cerrar sesión)
     fun limpiarCompras() {
-        viewModelScope.launch {
-            _uiState.value = CompraUiState()
-            proximoId = 1
-        }
+        // Las compras persisten en Room. Se usa al cerrar sesión para limpiar
+        // el estado en memoria; los datos en DB se mantienen para el próximo login.
+        _uiState.value = CompraUiState()
     }
 }
-

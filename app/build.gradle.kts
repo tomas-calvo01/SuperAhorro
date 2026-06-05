@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -68,4 +69,9 @@ dependencies {
 
 // Icons extendidos (para íconos del bottom bar)
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
+
+// Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 }

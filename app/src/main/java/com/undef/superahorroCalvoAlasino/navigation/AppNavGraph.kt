@@ -2,23 +2,24 @@ package com.undef.superahorroCalvoAlasino.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.undef.superahorroCalvoAlasino.ui.screens.*
-import androidx.compose.ui.platform.LocalContext
 import com.undef.superahorroCalvoAlasino.data.preferences.UserPreferencesRepository
+import com.undef.superahorroCalvoAlasino.data.repository.CompraRepository
+import com.undef.superahorroCalvoAlasino.ui.screens.*
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
 
 @Composable
-fun AppNavGraph() {
+fun AppNavGraph(compraRepository: CompraRepository) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val compraViewModel = remember { CompraViewModel(context) }
-    val userPrefsRepo = remember { UserPreferencesRepository(context!!) }
+    val compraViewModel = remember { CompraViewModel(compraRepository) }
+    val userPrefsRepo = remember { UserPreferencesRepository(context) }
     val usuarioViewModel = remember { UsuarioViewModel(context, userPrefsRepo) }
 
     NavHost(
@@ -54,4 +55,3 @@ fun AppNavGraph() {
         }
     }
 }
-
