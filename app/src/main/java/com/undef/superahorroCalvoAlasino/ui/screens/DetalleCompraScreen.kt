@@ -2,8 +2,8 @@ package com.undef.superahorroCalvoAlasino.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -160,6 +160,7 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
                 Card(
@@ -210,8 +211,8 @@ fun DetalleCompraScreen(navController: NavController, compraId: Int, compraViewM
                         )
                     }
                 } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(compra.productos) { producto ->
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        compra.productos.forEach { producto ->
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = Color.White)
