@@ -1,8 +1,10 @@
 package com.undef.superahorroCalvoAlasino.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -12,13 +14,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.undef.superahorroCalvoAlasino.data.network.dto.ProductoDTO
 import com.undef.superahorroCalvoAlasino.viewmodel.BuscarProductoViewModel
 
@@ -149,54 +156,257 @@ private fun ProductoResultadoCard(
     producto: ProductoDTO,
     onAgregar: () -> Unit
 ) {
+    var mostrarDetalle by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = producto.nombre?.ifBlank { "Sin nombre" } ?: "Sin nombre",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF2E7D32)
-                )
-                if (!producto.marca.isNullOrBlank()) {
-                    Text(
-                        text = producto.marca,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Imagen del producto
+                if (!producto.imagenUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = producto.imagenUrl,
+                        contentDescription = "Imagen de ${producto.nombre}",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF5F5F5)),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF5F5F5)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Sin\nimagen", fontSize = 10.sp, color = Color.Gray)
+                    }
                 }
-                if (!producto.codigo.isNullOrBlank()) {
+
+                // Información del producto
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = "Código: ${producto.codigo}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        text = producto.nombre?.ifBlank { "Sin nombre" } ?: "Sin nombre",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF2E7D32),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+
+                    if (!producto.marca.isNullOrBlank()) {
+                        Text(
+                            text = producto.marca,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!producto.cantidad.isNullOrBlank()) {
+                            Text(
+                                text = producto.cantidad,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+
+                        // Nutri-Score badge
+                        producto.nutriScore?.let { score ->
+                            val scoreColor = when(score.uppercase()) {
+                                "A" -> Color(0xFF00C851)
+                                "B" -> Color(0xFF8BC34A)
+                                "C" -> Color(0xFFFFD600)
+                                "D" -> Color(0xFFFF9800)
+                                "E" -> Color(0xFFFF5252)
+                                else -> Color.Gray
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(scoreColor)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "Nutri-Score: ${score.uppercase()}",
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
                 }
-                if (!producto.cantidad.isNullOrBlank()) {
+            }
+
+            // Información nutricional
+            producto.nutriments?.let { nutriments ->
+                Divider(color = Color(0xFFE0E0E0))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF9F9F9))
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Text(
-                        text = producto.cantidad,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        text = "📊 Información Nutricional (por 100g/ml)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = Color(0xFF2E7D32)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            nutriments.caloriasKcal?.let {
+                                NutrientRow("🔥 Calorías", "${String.format("%.0f", it)} kcal")
+                            }
+                            nutriments.proteinas100g?.let {
+                                NutrientRow("🥩 Proteínas", "${String.format("%.1f", it)} g")
+                            }
+                            nutriments.grasas100g?.let {
+                                NutrientRow("🧈 Grasas", "${String.format("%.1f", it)} g")
+                            }
+                            nutriments.carbohidratos100g?.let {
+                                NutrientRow("🍚 Carbohidratos", "${String.format("%.1f", it)} g")
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            nutriments.azucares100g?.let {
+                                NutrientRow("🍬 Azúcares", "${String.format("%.1f", it)} g")
+                            }
+                            nutriments.fibra100g?.let {
+                                NutrientRow("🌾 Fibra", "${String.format("%.1f", it)} g")
+                            }
+                            nutriments.sal100g?.let {
+                                NutrientRow("🧂 Sal", "${String.format("%.2f", it)} g")
+                            }
+                        }
+                    }
+
+                    if (mostrarDetalle) {
+                        Divider(modifier = Modifier.padding(vertical = 4.dp))
+
+                        if (!producto.ingredientes.isNullOrBlank()) {
+                            Text(
+                                text = "📋 Ingredientes:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                color = Color(0xFF2E7D32)
+                            )
+                            Text(
+                                text = producto.ingredientes,
+                                fontSize = 10.sp,
+                                color = Color.Gray,
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.height(4.dp))
+                        }
+
+                        if (!producto.alergenos.isNullOrBlank()) {
+                            Text(
+                                text = "⚠️ Alérgenos:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                color = Color(0xFFFF5252)
+                            )
+                            Text(
+                                text = producto.alergenos,
+                                fontSize = 10.sp,
+                                color = Color(0xFFFF5252)
+                            )
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { mostrarDetalle = !mostrarDetalle },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(
+                            text = if (mostrarDetalle) "Ver menos ▲" else "Ver más información ▼",
+                            fontSize = 11.sp,
+                            color = Color(0xFF2E7D32)
+                        )
+                    }
+                }
+            } ?: run {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFFFF8E1))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "⚠️ Sin información nutricional disponible",
+                        fontSize = 11.sp,
+                        color = Color(0xFFFF8F00)
                     )
                 }
             }
-            Spacer(Modifier.width(8.dp))
-            Button(
-                onClick = onAgregar,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+
+            // Botón volver
+            Divider(color = Color(0xFFE0E0E0))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text("Agregar")
+                OutlinedButton(
+                    onClick = onAgregar,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color(0xFF2E7D32)
+                    )
+                ) {
+                    Text("← Volver sin agregar")
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun NutrientRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = Color.Gray
+        )
+        Text(
+            text = value,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
     }
 }
