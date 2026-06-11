@@ -77,5 +77,9 @@ fun AppNavGraph(
             val compraId = backStackEntry.arguments?.getInt("compraId") ?: 0
             BuscarProductoScreen(navController, compraId, buscarProductoViewModel)
         }
+
+        composable(NavRoutes.OlvidoContrasena.route) {
+            OlvidoContrasenaScreen(navController)
+        }
     }
 }

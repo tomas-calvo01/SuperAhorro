@@ -20,5 +20,6 @@ sealed class NavRoutes(val route: String) {
     object BuscarProducto : NavRoutes("buscar_producto/{compraId}") {
         fun withId(id: Int) = "buscar_producto/$id"
     }
+    object OlvidoContrasena : NavRoutes("olvido_contrasena")
 }
 

@@ -10,5 +10,6 @@ data class CompraEntity(
     val fecha: String,
     val hora: String,
     val total: Double,
-    val usuarioEmail: String
+    val usuarioEmail: String,
+    val ticketImageUri: String? = null
 )

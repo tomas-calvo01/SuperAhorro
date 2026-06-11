@@ -50,4 +50,8 @@ class CompraRepository(
 
     suspend fun getCompraConProductos(id: Int): Compra? =
         compraDao.getCompraConProductos(id)?.toModel()
+
+    suspend fun actualizarTicketUri(compraId: Int, uri: String?) {
+        compraDao.updateTicketUri(compraId, uri)
+    }
 }

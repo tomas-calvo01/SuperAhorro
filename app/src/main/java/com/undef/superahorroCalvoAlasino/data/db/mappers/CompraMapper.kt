@@ -13,7 +13,8 @@ fun CompraConProductos.toModel(): Compra = Compra(
     hora = compra.hora,
     total = compra.total,
     productos = productos.map { it.toModel() },
-    usuarioEmail = compra.usuarioEmail
+    usuarioEmail = compra.usuarioEmail,
+    ticketImageUri = compra.ticketImageUri
 )
 
 fun Compra.toEntity(): CompraEntity = CompraEntity(
@@ -22,7 +23,8 @@ fun Compra.toEntity(): CompraEntity = CompraEntity(
     fecha = fecha,
     hora = hora,
     total = total,
-    usuarioEmail = usuarioEmail
+    usuarioEmail = usuarioEmail,
+    ticketImageUri = ticketImageUri
 )
 
 fun ProductoEntity.toModel(): Producto = Producto(

@@ -34,4 +34,7 @@ interface CompraDao {
     @Transaction
     @Query("SELECT * FROM compras WHERE id = :id")
     suspend fun getCompraConProductos(id: Int): CompraConProductos?
+
+    @Query("UPDATE compras SET ticketImageUri = :uri WHERE id = :id")
+    suspend fun updateTicketUri(id: Int, uri: String?)
 }

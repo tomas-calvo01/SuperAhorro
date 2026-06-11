@@ -12,18 +12,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.undef.superahorroCalvoAlasino.R
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
-import kotlin.math.cos
-import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -253,7 +253,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Promedio por Compra", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.estadisticas_promedio), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "$ ${"%.2f".format(promedioGasto)}",
@@ -261,6 +261,43 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFFF6F00)
                         )
+                    }
+                }
+
+                // Evolución mensual (gráfico de barras)
+                val gastosPorMes = compras
+                    .groupBy { compra ->
+                        // Formato esperado DD/MM/YYYY — tomamos MM/YYYY
+                        val partes = compra.fecha.split("/")
+                        if (partes.size >= 3) "${partes[1]}/${partes[2]}" else compra.fecha
+                    }
+                    .mapValues { (_, c) -> c.sumOf { it.total } }
+                    .toList()
+                    .sortedBy { (mes, _) ->
+                        val p = mes.split("/")
+                        if (p.size == 2) (p[1] + p[0].padStart(2, '0')) else mes
+                    }
+
+                if (gastosPorMes.size >= 2) {
+                    Text(
+                        stringResource(R.string.estadisticas_evolucion_mensual),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            BarChart(
+                                data = gastosPorMes,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -343,15 +380,68 @@ fun PieChart(
 
 fun getColorForIndex(index: Int): Color {
     val colors = listOf(
-        Color(0xFF2E7D32),  // Verde oscuro
-        Color(0xFF1976D2),  // Azul
-        Color(0xFFD32F2F),  // Rojo
-        Color(0xFFF57C00),  // Naranja
-        Color(0xFF7B1FA2),  // Púrpura
-        Color(0xFF0097A7),  // Cian
-        Color(0xFF388E3C),  // Verde
-        Color(0xFFC2185B),  // Rosa
+        Color(0xFF2E7D32),
+        Color(0xFF1976D2),
+        Color(0xFFD32F2F),
+        Color(0xFFF57C00),
+        Color(0xFF7B1FA2),
+        Color(0xFF0097A7),
+        Color(0xFF388E3C),
+        Color(0xFFC2185B),
     )
     return colors[index % colors.size]
+}
+
+@Composable
+fun BarChart(
+    data: List<Pair<String, Double>>,
+    modifier: Modifier = Modifier
+) {
+    if (data.isEmpty()) return
+    val maxValue = data.maxOf { it.second }.takeIf { it > 0 } ?: 1.0
+    val barColor = Color(0xFF2E7D32)
+
+    Column(modifier = modifier) {
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            val barCount = data.size
+            val totalWidth = size.width
+            val totalHeight = size.height
+            val barWidth = (totalWidth / barCount) * 0.55f
+            val gap = (totalWidth / barCount) * 0.45f
+
+            data.forEachIndexed { index, (_, value) ->
+                val barHeight = ((value / maxValue) * totalHeight).toFloat()
+                val left = index * (barWidth + gap) + gap / 2f
+                val top = totalHeight - barHeight
+
+                drawRect(
+                    color = barColor,
+                    topLeft = Offset(left, top),
+                    size = Size(barWidth, barHeight)
+                )
+            }
+        }
+
+        // Labels del eje X
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            data.forEach { (label, _) ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
+        }
+    }
 }
 

@@ -108,6 +108,11 @@ fun LoginScreen(navController: NavController, usuarioViewModel: UsuarioViewModel
         ) {
             Text("¿No tenés cuenta? Registrate", color = Color(0xFF2E7D32))
         }
+        TextButton(
+            onClick = { navController.navigate(NavRoutes.OlvidoContrasena.route) }
+        ) {
+            Text("¿Olvidaste tu contraseña?", color = Color(0xFF757575))
+        }
     }
 }
 

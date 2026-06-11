@@ -149,4 +149,30 @@ class CompraViewModel(
     fun limpiarMensajeRegistro() {
         _mensajeRegistroRemoto.value = null
     }
+
+    fun eliminarCompra(compra: Compra) {
+        viewModelScope.launch {
+            repository.eliminarCompra(compra)
+        }
+    }
+
+    fun eliminarProducto(productoId: Int, compraId: Int) {
+        viewModelScope.launch {
+            val compra = _uiState.value.compras.find { it.id == compraId } ?: return@launch
+            val producto = compra.productos.find { it.id == productoId } ?: return@launch
+            repository.eliminarProducto(producto, compraId)
+        }
+    }
+
+    fun actualizarProducto(producto: com.undef.superahorroCalvoAlasino.model.Producto, compraId: Int) {
+        viewModelScope.launch {
+            repository.actualizarProducto(producto, compraId)
+        }
+    }
+
+    fun actualizarTicketUri(compraId: Int, uri: String?) {
+        viewModelScope.launch {
+            repository.actualizarTicketUri(compraId, uri)
+        }
+    }
 }

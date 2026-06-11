@@ -85,4 +85,7 @@ dependencies {
 
     // Coil para cargar imágenes desde internet
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // Activity KTX para ActivityResultContracts (PickVisualMedia, TakePicture)
+    implementation("androidx.activity:activity-ktx:1.9.0")
 }

@@ -9,7 +9,8 @@ data class Compra(
     val hora: String,
     val total: Double,
     val productos: List<Producto> = emptyList(),
-    val usuarioEmail: String = ""
+    val usuarioEmail: String = "",
+    val ticketImageUri: String? = null
 )
 
 data class Producto(

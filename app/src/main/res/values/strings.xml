@@ -1,3 +1,166 @@
 <resources>
     <string name="app_name">SuperAhorro</string>
+
+    <!-- General -->
+    <string name="btn_guardar">Guardar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_eliminar">Eliminar</string>
+    <string name="btn_editar">Editar</string>
+    <string name="btn_volver">Volver</string>
+    <string name="btn_aceptar">Aceptar</string>
+    <string name="btn_compartir">Compartir</string>
+    <string name="btn_sincronizar">Sincronizar</string>
+    <string name="btn_agregar">Agregar</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="accion_no_reversible">Esta acción no se puede deshacer.</string>
+
+    <!-- Splash -->
+    <string name="splash_bienvenida">Bienvenido a SuperAhorro</string>
+    <string name="splash_descripcion">Tu asistente de compras inteligente</string>
+
+    <!-- Login -->
+    <string name="login_titulo">Super Ahorro</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_btn_ingresar">Iniciar sesión</string>
+    <string name="login_link_registro">¿No tenés cuenta? Registrate</string>
+    <string name="login_link_olvido">¿Olvidaste tu contraseña?</string>
+    <string name="login_error_credenciales">Email o contraseña incorrectos</string>
+    <string name="login_error_campos">Por favor completa todos los campos</string>
+
+    <!-- Registro -->
+    <string name="registro_titulo">Crear Cuenta</string>
+    <string name="registro_nombre">Nombre</string>
+    <string name="registro_btn_crear">Crear cuenta</string>
+    <string name="registro_link_login">¿Ya tenés cuenta? Iniciá sesión</string>
+    <string name="registro_error_email_existe">Ya existe una cuenta con ese email</string>
+    <string name="registro_error_campos">Por favor completá todos los campos</string>
+
+    <!-- Olvido de Contraseña -->
+    <string name="olvido_titulo">Recuperar Contraseña</string>
+    <string name="olvido_descripcion">Ingresá tu email y te enviaremos instrucciones para recuperar tu contraseña.</string>
+    <string name="olvido_btn_enviar">Enviar instrucciones</string>
+    <string name="olvido_exito_titulo">Email enviado</string>
+    <string name="olvido_exito_descripcion">Si el email está registrado, recibirás las instrucciones en tu casilla.</string>
+    <string name="olvido_link_volver_login">Volver al inicio de sesión</string>
+    <string name="olvido_error_email">Por favor ingresá tu email</string>
+
+    <!-- Home -->
+    <string name="home_titulo">Inicio</string>
+    <string name="home_ultima_compra">Última Compra</string>
+    <string name="home_sin_compras">Sin compras registradas</string>
+    <string name="home_btn_nueva_compra">Nueva Compra</string>
+    <string name="home_resumen_gastos">Resumen de Gastos</string>
+    <string name="home_total_gastado">Total Gastado</string>
+    <string name="home_cantidad_compras">compra(s)</string>
+
+    <!-- Nueva Compra -->
+    <string name="nueva_compra_titulo">Nueva Compra</string>
+    <string name="nueva_compra_subtitulo">Registrar Nueva Compra</string>
+    <string name="nueva_compra_supermercado">Supermercado</string>
+    <string name="nueva_compra_supermercado_hint">Ej: Carrefour</string>
+    <string name="nueva_compra_fecha">Fecha</string>
+    <string name="nueva_compra_fecha_hint">DD/MM/YYYY</string>
+    <string name="nueva_compra_hora">Hora</string>
+    <string name="nueva_compra_hora_hint">HH:MM</string>
+    <string name="nueva_compra_total">Total de Compra</string>
+    <string name="nueva_compra_btn_guardar">Guardar Compra</string>
+    <string name="nueva_compra_error_campos">Por favor completá supermercado, fecha y hora, y agregá al menos un producto</string>
+
+    <!-- Detalle Compra -->
+    <string name="detalle_titulo">Detalle Compra</string>
+    <string name="detalle_supermercado">Supermercado</string>
+    <string name="detalle_fecha">Fecha</string>
+    <string name="detalle_hora">Hora</string>
+    <string name="detalle_total">Total</string>
+    <string name="detalle_productos">Productos</string>
+    <string name="detalle_sin_productos">Sin productos registrados</string>
+    <string name="detalle_compra_no_encontrada">Compra no encontrada</string>
+    <string name="detalle_eliminar_titulo">Eliminar Compra</string>
+    <string name="detalle_eliminar_pregunta">¿Estás seguro que querés eliminar esta compra?</string>
+    <string name="detalle_eliminar_producto_titulo">Eliminar Producto</string>
+    <string name="detalle_eliminar_producto_pregunta">¿Eliminás este producto de la compra?</string>
+    <string name="detalle_compartir_via">Compartir compra usando</string>
+    <string name="detalle_ticket_titulo">Ticket de Compra</string>
+    <string name="detalle_ticket_tomar_foto">Tomar foto</string>
+    <string name="detalle_ticket_galeria">Desde galería</string>
+    <string name="detalle_ticket_sin_imagen">Sin imagen de ticket</string>
+    <string name="detalle_ticket_eliminar">Eliminar imagen</string>
+    <string name="detalle_mas_opciones">Más opciones</string>
+    <string name="detalle_agregar_producto">Agregar Producto</string>
+
+    <!-- Nuevo Producto -->
+    <string name="nuevo_producto_titulo">Nuevo Producto</string>
+    <string name="nuevo_producto_subtitulo">Agregar Producto</string>
+    <string name="nuevo_producto_nombre">Nombre Producto</string>
+    <string name="nuevo_producto_nombre_hint">Ej: Leche La Serenísima</string>
+    <string name="nuevo_producto_codigo">Código de Barras</string>
+    <string name="nuevo_producto_codigo_hint">Ej: 7790123</string>
+    <string name="nuevo_producto_descripcion">Descripción</string>
+    <string name="nuevo_producto_descripcion_hint">Ej: 1 litro entera</string>
+    <string name="nuevo_producto_precio">Precio</string>
+    <string name="nuevo_producto_precio_hint">Ej: 850.00</string>
+    <string name="nuevo_producto_btn_guardar">Guardar Producto</string>
+    <string name="nuevo_producto_buscar">Buscar producto</string>
+
+    <!-- Historial -->
+    <string name="historial_titulo">Historial de Compras</string>
+    <string name="historial_sin_compras">No hay compras registradas</string>
+    <string name="historial_sin_compras_desc">Registrá tu primera compra para comenzar</string>
+
+    <!-- Estadísticas -->
+    <string name="estadisticas_titulo">Estadísticas</string>
+    <string name="estadisticas_total_gastado">Total Gastado</string>
+    <string name="estadisticas_por_supermercado">Gastos por Supermercado</string>
+    <string name="estadisticas_producto_mas_comprado">Producto más comprado</string>
+    <string name="estadisticas_promedio">Promedio por Compra</string>
+    <string name="estadisticas_evolucion_mensual">Evolución Mensual</string>
+    <string name="estadisticas_sin_datos">Sin datos de compras para mostrar estadísticas</string>
+    <string name="estadisticas_desglose">Desglose por Supermercado</string>
+    <string name="estadisticas_comprado_veces">veces</string>
+
+    <!-- Perfil -->
+    <string name="perfil_titulo">Mi Perfil</string>
+    <string name="perfil_nombre">Nombre</string>
+    <string name="perfil_email">Email</string>
+    <string name="perfil_btn_editar">Editar Perfil</string>
+    <string name="perfil_btn_cerrar_sesion">Cerrar Sesión</string>
+
+    <!-- Editar Perfil -->
+    <string name="editar_perfil_titulo">Editar Perfil</string>
+    <string name="editar_perfil_btn_guardar">Guardar Cambios</string>
+
+    <!-- Settings -->
+    <string name="settings_titulo">Configuración</string>
+    <string name="settings_tema_oscuro">Modo oscuro</string>
+    <string name="settings_notificaciones">Notificaciones</string>
+    <string name="settings_idioma">Idioma</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_compartir_app">Compartir App</string>
+    <string name="settings_enviar_feedback">Enviar Feedback</string>
+
+    <!-- Buscar Producto -->
+    <string name="buscar_producto_titulo">Buscar Producto</string>
+    <string name="buscar_producto_hint">Nombre del producto</string>
+    <string name="buscar_producto_btn">Buscar</string>
+    <string name="buscar_producto_sin_resultados">Sin resultados</string>
+    <string name="buscar_producto_seleccionar">Seleccionar</string>
+
+    <!-- Producto card -->
+    <string name="producto_id">ID Producto:</string>
+    <string name="producto_codigo">Código:</string>
+    <string name="producto_descripcion">Descripción:</string>
+    <string name="producto_precio_unitario">Precio Unitario:</string>
+    <string name="producto_cantidad">Cantidad:</string>
+
+    <!-- Nav Bar -->
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_historial">Historial</string>
+    <string name="nav_estadisticas">Estadísticas</string>
+    <string name="nav_perfil">Perfil</string>
+
+    <!-- Mensajes -->
+    <string name="msg_compra_sincronizada">Compra sincronizada correctamente</string>
+    <string name="msg_error_sincronizar">Error al sincronizar</string>
+    <string name="msg_compartido_desde">Compartido desde SuperAhorro</string>
 </resources>
