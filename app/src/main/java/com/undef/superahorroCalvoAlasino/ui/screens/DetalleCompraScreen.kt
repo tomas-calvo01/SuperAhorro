@@ -107,6 +107,11 @@ fun DetalleCompraScreen(
                 },
                 actions = {
                     if (compra != null) {
+                        // Ícono de búsqueda para networking
+                        IconButton(onClick = { navController.navigate(NavRoutes.BuscarProducto.withId(compraId)) }) {
+                            Icon(Icons.Default.Search, contentDescription = "Buscar producto", tint = Color.White)
+                        }
+                        // Menú de 3 puntos
                         IconButton(onClick = { mostrarMenu = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.detalle_mas_opciones), tint = Color.White)
                         }
@@ -155,17 +160,6 @@ fun DetalleCompraScreen(
                     navigationIconContentColor = Color.White
                 )
             )
-        },
-        floatingActionButton = {
-            if (compra != null) {
-                FloatingActionButton(
-                    onClick = { navController.navigate(NavRoutes.NuevoProducto.withId(compra.id)) },
-                    containerColor = Color(0xFF2E7D32),
-                    contentColor = Color.White
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.detalle_agregar_producto))
-                }
-            }
         }
     ) { padding ->
         if (compra == null) {

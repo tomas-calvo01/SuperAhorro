@@ -15,6 +15,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -97,6 +99,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                         "Gastos por Supermercado",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2E7D32),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
@@ -124,6 +127,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                                 "Desglose por Supermercado",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121),
                                 modifier = Modifier.padding(bottom = 12.dp)
                             )
                             
@@ -231,7 +235,8 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                                 Text(
                                     productoMasComprado.key,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF212121)
                                 )
                                 Text(
                                     "Comprado ${productoMasComprado.value.size} veces",
@@ -253,7 +258,12 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text(stringResource(R.string.estadisticas_promedio), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(R.string.estadisticas_promedio),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF212121)
+                        )
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "$ ${"%.2f".format(promedioGasto)}",
@@ -283,6 +293,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                         stringResource(R.string.estadisticas_evolucion_mensual),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2E7D32),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Card(
@@ -332,7 +343,7 @@ fun PieChart(
                     sweepAngle = sweepAngle,
                     useCenter = true,
                     topLeft = Offset(centerX - radius, centerY - radius),
-                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
+                    size = Size(radius * 2, radius * 2)
                 )
                 
                 // Dibujar borde del segmento
@@ -342,7 +353,7 @@ fun PieChart(
                     sweepAngle = sweepAngle,
                     useCenter = true,
                     topLeft = Offset(centerX - radius, centerY - radius),
-                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
+                    size = Size(radius * 2, radius * 2),
                     style = Stroke(width = 2f)
                 )
 
@@ -412,6 +423,7 @@ fun BarChart(
             val totalHeight = size.height
             val barWidth = (totalWidth / barCount) * 0.55f
             val gap = (totalWidth / barCount) * 0.45f
+            val totalGasto = data.sumOf { it.second }
 
             data.forEachIndexed { index, (_, value) ->
                 val barHeight = ((value / maxValue) * totalHeight).toFloat()
@@ -423,6 +435,23 @@ fun BarChart(
                     topLeft = Offset(left, top),
                     size = Size(barWidth, barHeight)
                 )
+                
+                // Dibujar porcentaje dentro de la barra
+                val percentage = (value / totalGasto * 100).toInt()
+                if (percentage > 0 && barHeight > 40f) {
+                    val paint = android.graphics.Paint().apply {
+                        color = Color.White.toArgb()
+                        textAlign = android.graphics.Paint.Align.CENTER
+                        textSize = 32f
+                        isFakeBoldText = true
+                    }
+                    drawContext.canvas.nativeCanvas.drawText(
+                        "$percentage%",
+                        left + barWidth / 2f,
+                        top + barHeight / 2f + 12f,
+                        paint
+                    )
+                }
             }
         }
 
