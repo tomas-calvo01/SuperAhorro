@@ -303,7 +303,12 @@ fun NuevaCompraScreen(navController: NavController, compraViewModel: CompraViewM
                                 )
                             }
                             
-                            compraViewModel.agregarCompraConProductos(
+                            // ✅ FLUJO INTEGRADO POST + ROOM:
+                            // 1. Guarda en Room primero (optimistic update)
+                            // 2. Sincroniza con servidor (POST)
+                            // 3. Si exitoso → Room ya notificó el Flow
+                            // 4. UI se actualiza automáticamente con collectAsStateWithLifecycle
+                            compraViewModel.guardarCompraConSincronizacion(
                                 supermercado = supermercado,
                                 fecha = fecha,
                                 hora = hora,

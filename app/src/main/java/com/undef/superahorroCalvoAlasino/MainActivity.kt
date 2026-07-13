@@ -21,7 +21,11 @@ class MainActivity : ComponentActivity() {
         CompraRepository(database.compraDao(), database.productoDao())
     }
     private val networkRepository by lazy {
-        NetworkRepository(RetrofitClient.openFoodFactsApi, RetrofitClient.compraApiService)
+        NetworkRepository(
+            RetrofitClient.openFoodFactsApi,
+            RetrofitClient.compraApiService,
+            database.productoBuscadoDao()  // Inyectar DAO para caché de productos
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
