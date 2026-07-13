@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +19,9 @@ import com.undef.superahorroCalvoAlasino.ui.screens.*
 import com.undef.superahorroCalvoAlasino.viewmodel.BuscarProductoViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
 import com.undef.superahorroCalvoAlasino.viewmodel.UsuarioViewModel
+import com.undef.superahorroCalvoAlasino.viewmodel.factories.BuscarProductoViewModelFactory
+import com.undef.superahorroCalvoAlasino.viewmodel.factories.CompraViewModelFactory
+import com.undef.superahorroCalvoAlasino.viewmodel.factories.UsuarioViewModelFactory
 
 @Composable
 fun AppNavGraph(
@@ -26,10 +30,18 @@ fun AppNavGraph(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val compraViewModel = remember { CompraViewModel(compraRepository, networkRepository) }
-    val buscarProductoViewModel = remember { BuscarProductoViewModel(networkRepository) }
     val userPrefsRepo = remember { UserPreferencesRepository(context) }
-    val usuarioViewModel = remember { UsuarioViewModel(userPrefsRepo) }
+
+    // ViewModels con Factory pattern
+    val compraViewModel: CompraViewModel = viewModel(
+        factory = CompraViewModelFactory(compraRepository, networkRepository)
+    )
+    val buscarProductoViewModel: BuscarProductoViewModel = viewModel(
+        factory = BuscarProductoViewModelFactory(networkRepository)
+    )
+    val usuarioViewModel: UsuarioViewModel = viewModel(
+        factory = UsuarioViewModelFactory(userPrefsRepo)
+    )
 
     // Cuando el email del usuario cambia (login / logout / inicio de sesión guardada),
     // redirige CompraViewModel para cargar sólo las compras de ese usuario.
