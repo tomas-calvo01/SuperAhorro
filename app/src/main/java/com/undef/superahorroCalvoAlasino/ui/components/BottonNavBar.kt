@@ -7,9 +7,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.undef.superahorroCalvoAlasino.navigation.NavRoutes
@@ -45,9 +42,9 @@ fun BottomNavBar(navController: NavController) {
                 icon = { Icon(icon, contentDescription = label) },
                 label = { Text(label) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF2E7D32),
-                    selectedTextColor = Color(0xFF2E7D32),
-                    indicatorColor = Color(0xFFE8F5E9)
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.secondary
                 )
             )
         }

@@ -72,19 +72,19 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Total Gastado", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                        Text("Total Gastado", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "$ ${"%.2f".format(totalGastado)}",
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2E7D32)
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        Text("En ${compras.size} compra(s)", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("En ${compras.size} compra(s)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -140,7 +140,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                                         .fillMaxWidth()
                                         .padding(vertical = 6.dp)
                                         .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Row(
@@ -254,7 +254,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -262,14 +262,14 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                             stringResource(R.string.estadisticas_promedio),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF212121)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "$ ${"%.2f".format(promedioGasto)}",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFF6F00)
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     }
                 }
@@ -293,7 +293,7 @@ fun EstadisticasScreen(navController: NavController, compraViewModel: CompraView
                         stringResource(R.string.estadisticas_evolucion_mensual),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Card(
@@ -410,7 +410,7 @@ fun BarChart(
 ) {
     if (data.isEmpty()) return
     val maxValue = data.maxOf { it.second }.takeIf { it > 0 } ?: 1.0
-    val barColor = Color(0xFF2E7D32)
+    val barColor = MaterialTheme.colorScheme.primary
 
     Column(modifier = modifier) {
         androidx.compose.foundation.Canvas(

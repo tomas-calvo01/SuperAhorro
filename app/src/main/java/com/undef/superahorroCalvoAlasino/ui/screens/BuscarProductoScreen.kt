@@ -160,7 +160,7 @@ private fun ProductoResultadoCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -248,7 +248,7 @@ private fun ProductoResultadoCard(
                             ) {
                                 Text(
                                     text = "Nutri-Score: ${score.uppercase()}",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -260,11 +260,11 @@ private fun ProductoResultadoCard(
 
             // Información nutricional
             producto.nutriments?.let { nutriments ->
-                Divider(color = Color(0xFFE0E0E0))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFF9F9F9))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -272,7 +272,7 @@ private fun ProductoResultadoCard(
                         text = "📊 Información Nutricional (por 100g/ml)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = Color(0xFF2E7D32)
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Row(
@@ -349,7 +349,7 @@ private fun ProductoResultadoCard(
                         Text(
                             text = if (mostrarDetalle) "Ver menos ▲" else "Ver más información ▼",
                             fontSize = 11.sp,
-                            color = Color(0xFF2E7D32)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -357,14 +357,14 @@ private fun ProductoResultadoCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFFFF8E1))
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "⚠️ Sin información nutricional disponible",
                         fontSize = 11.sp,
-                        color = Color(0xFFFF8F00)
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }
@@ -400,13 +400,13 @@ private fun NutrientRow(label: String, value: String) {
         Text(
             text = label,
             fontSize = 11.sp,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = value,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

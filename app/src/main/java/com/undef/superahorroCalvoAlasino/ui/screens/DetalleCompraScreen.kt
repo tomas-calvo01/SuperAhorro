@@ -113,12 +113,11 @@ fun DetalleCompraScreen(
                         }
                         // Menú de 3 puntos
                         IconButton(onClick = { mostrarMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.detalle_mas_opciones), tint = Color.White)
                         }
                         DropdownMenu(expanded = mostrarMenu, onDismissRequest = { mostrarMenu = false }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.btn_compartir)) },
-                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, tint = Color(0xFF2E7D32)) },
+                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                                 onClick = {
                                     val texto = buildString {
                                         append("🛒 Compra en ${compra.supermercado}\n")
@@ -168,7 +167,7 @@ fun DetalleCompraScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(R.string.detalle_compra_no_encontrada), style = MaterialTheme.typography.titleLarge, color = Color.Gray)
+                Text(stringResource(R.string.detalle_compra_no_encontrada), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             Column(
@@ -181,29 +180,29 @@ fun DetalleCompraScreen(
                 // Resumen de la compra
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(stringResource(R.string.detalle_supermercado), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                        Text(compra.supermercado, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                        Text(stringResource(R.string.detalle_supermercado), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(compra.supermercado, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(12.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Column {
-                                Text(stringResource(R.string.detalle_fecha), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                                Text(compra.fecha, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                                Text(stringResource(R.string.detalle_fecha), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(compra.fecha, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
                             Column {
-                                Text(stringResource(R.string.detalle_hora), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                                Text(compra.hora, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                                Text(stringResource(R.string.detalle_hora), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(compra.hora, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
                         }
                         Spacer(Modifier.height(12.dp))
-                        Text(stringResource(R.string.detalle_total), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                        Text(stringResource(R.string.detalle_total), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(
                             "$ ${compra.total}",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF2E7D32)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
