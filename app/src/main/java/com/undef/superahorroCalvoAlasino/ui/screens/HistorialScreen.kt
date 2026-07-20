@@ -1,5 +1,7 @@
 package com.undef.superahorroCalvoAlasino.ui.screens
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,20 +14,48 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.undef.superahorroCalvoAlasino.model.Compra
 import com.undef.superahorroCalvoAlasino.model.FiltroCompra
 import com.undef.superahorroCalvoAlasino.model.OrdenCompra
 import com.undef.superahorroCalvoAlasino.ui.components.BottomNavBar
 import com.undef.superahorroCalvoAlasino.viewmodel.CompraViewModel
+import java.io.File
+
+private fun generarYCompartirCsv(context: Context, compras: List<Compra>) {
+    val csv = buildString {
+        appendLine("ID,Supermercado,Fecha,Hora,Total,Cantidad Productos,Productos")
+        compras.forEach { compra ->
+            val productos = compra.productos.joinToString(";") { it.nombre }
+            appendLine(
+                "${compra.id},\"${compra.supermercado}\",${compra.fecha},${compra.hora}," +
+                "${"%.2f".format(compra.total)},${compra.productos.size},\"$productos\""
+            )
+        }
+    }
+    val archivo = File(context.cacheDir, "historial_compras.csv")
+    archivo.writeText(csv)
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/csv"
+        putExtra(Intent.EXTRA_SUBJECT, "Historial de compras - SuperAhorro")
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Exportar historial via"))
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +64,7 @@ fun HistorialScreen(navController: NavController, compraViewModel: CompraViewMod
     val filtro by compraViewModel.filtro.collectAsStateWithLifecycle()
     var compraExpandidaId by remember { mutableStateOf<Int?>(null) }
     var mostrarFiltros by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val filtroActivo = filtro != FiltroCompra()
 
@@ -42,6 +73,15 @@ fun HistorialScreen(navController: NavController, compraViewModel: CompraViewMod
             TopAppBar(
                 title = { Text("Historial de Compras") },
                 actions = {
+                    if (comprasFiltradas.isNotEmpty()) {
+                        IconButton(onClick = { generarYCompartirCsv(context, comprasFiltradas) }) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = "Exportar CSV",
+                                tint = LocalContentColor.current
+                            )
+                        }
+                    }
                     BadgedBox(
                         badge = { if (filtroActivo) Badge() }
                     ) {
