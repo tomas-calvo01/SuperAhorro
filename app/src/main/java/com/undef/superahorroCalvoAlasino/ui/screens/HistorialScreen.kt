@@ -297,7 +297,7 @@ fun HistorialScreen(navController: NavController, compraViewModel: CompraViewMod
 
                                 if (estaExpandida && compra.productos.isNotEmpty()) {
                                     Spacer(Modifier.height(12.dp))
-                                    Divider(thickness = 0.5.dp, color = Color.LightGray)
+                                    HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
                                     Spacer(Modifier.height(12.dp))
 
                                     Text(

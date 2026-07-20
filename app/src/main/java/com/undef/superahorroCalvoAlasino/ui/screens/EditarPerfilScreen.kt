@@ -149,7 +149,7 @@ fun EditarPerfilScreen(navController: NavController, usuarioViewModel: UsuarioVi
 
             Spacer(Modifier.height(24.dp))
 
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
             // Sección de Contraseña
             Text(

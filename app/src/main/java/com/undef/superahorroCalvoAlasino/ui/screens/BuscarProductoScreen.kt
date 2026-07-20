@@ -260,7 +260,7 @@ private fun ProductoResultadoCard(
 
             // Información nutricional
             producto.nutriments?.let { nutriments ->
-                Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -308,7 +308,7 @@ private fun ProductoResultadoCard(
                     }
 
                     if (mostrarDetalle) {
-                        Divider(modifier = Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                         if (!producto.ingredientes.isNullOrBlank()) {
                             Text(
@@ -370,7 +370,7 @@ private fun ProductoResultadoCard(
             }
 
             // Botón volver
-            Divider(color = Color(0xFFE0E0E0))
+            HorizontalDivider(color = Color(0xFFE0E0E0))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

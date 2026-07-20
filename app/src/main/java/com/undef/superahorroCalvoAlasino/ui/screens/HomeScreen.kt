@@ -115,7 +115,7 @@ fun HomeScreen(navController: NavController, compraViewModel: CompraViewModel) {
                                 value = compras.size.toString(),
                                 color = Color.White
                             )
-                            Divider(
+                            VerticalDivider(
                                 modifier = Modifier
                                     .width(1.dp)
                                     .height(40.dp),
@@ -151,7 +151,7 @@ fun HomeScreen(navController: NavController, compraViewModel: CompraViewModel) {
                             backgroundColor = Color(0xFFE3F2FD)
                         )
 
-                        // Compra más cara
+                        //  Compra más cara
                         val compraMasCaraTotal = compras.maxByOrNull { it.total }?.total ?: 0.0
                         InsightCard(
                             icon = Icons.Default.TrendingDown,

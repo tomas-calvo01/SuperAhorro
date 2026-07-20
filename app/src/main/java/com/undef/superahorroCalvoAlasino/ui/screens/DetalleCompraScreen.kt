@@ -364,7 +364,7 @@ private fun ProductoCard(
                 }
                 Text("$${String.format("%.2f", producto.precio)}", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineSmall, color = Color(0xFF2E7D32))
             }
-            Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFE0E0E0))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFE0E0E0))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(stringResource(R.string.producto_codigo), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 Text(if (producto.codigo.isEmpty()) "N/A" else producto.codigo, style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
