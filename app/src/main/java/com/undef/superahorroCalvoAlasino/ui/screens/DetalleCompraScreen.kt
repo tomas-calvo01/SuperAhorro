@@ -113,6 +113,7 @@ fun DetalleCompraScreen(
                         }
                         // Menú de 3 puntos
                         IconButton(onClick = { mostrarMenu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "Menú", tint = Color.White)
                         }
                         DropdownMenu(expanded = mostrarMenu, onDismissRequest = { mostrarMenu = false }) {
                             DropdownMenuItem(
